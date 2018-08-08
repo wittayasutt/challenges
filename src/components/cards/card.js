@@ -32,7 +32,8 @@ class Card extends Component {
 	handlePay(id, amount, currency) {
 		fetch('http://localhost:3001/payments', {
 			method: 'POST',
-			body: `{ "charitiesId": ${id}, "amount": ${amount}, "currency": "${currency}" }`
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ charitiesId: id, amount, currency })
 		})
 			.then(resp => resp.json())
 			.then(() => {
