@@ -53,7 +53,8 @@ class Card extends Component {
 				<p>{item.name}</p>
 				<Payments setAmount={this.handleSetAmount} />
 				<button
-					onClick={this.handlePay(item.id, selectedAmount, item.currency)}>
+					onClick={() =>
+						this.handlePay(item.id, selectedAmount, item.currency)}>
 					Pay
 				</button>
 			</Wrapper>

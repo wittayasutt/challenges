@@ -17,7 +17,7 @@ class Title extends Component {
 
 const mapStateToProps = state => ({
 	donate: state.donate,
-	message: state.messagee
+	message: state.message
 })
 
 export default connect(mapStateToProps)(Title)
