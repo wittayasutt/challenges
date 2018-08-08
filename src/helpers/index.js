@@ -1,2 +1,2 @@
 export const summaryDonations = danations =>
-	danations.reduce((accumulator, value) => accumulator + value)
+	danations.reduce((accumulator, value) => accumulator + (value ? value : 0))
