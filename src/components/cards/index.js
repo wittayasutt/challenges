@@ -9,6 +9,12 @@ import { summaryDonations } from '../../helpers'
 
 import Card from './card'
 
+const Columns = styled.div`
+	@media screen and (min-width: 769px) {
+		flex-flow: row wrap;
+	}
+`
+
 class Cards extends Component {
 	constructor(props) {
 		super()
@@ -37,7 +43,11 @@ class Cards extends Component {
 	render() {
 		const { charities } = this.state
 
-		return charities.map((item, index) => <Card key={index} item={item} />)
+		return (
+			<Columns className="columns">
+				{charities.map((item, index) => <Card key={index} item={item} />)}
+			</Columns>
+		)
 	}
 }
 

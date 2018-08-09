@@ -5,15 +5,19 @@ import styled from 'styled-components'
 import fetch from 'isomorphic-fetch'
 
 import { updateTotalDonate, updateMessage } from '../../actions'
+import { toCurrency } from '../../helpers'
 
 import Payments from './payments'
 
-const Wrapper = styled.div`
-	margin: 10px;
+const Wrapper = styled.div``
+
+const Card = styled.div`
+	height: 300px;
+
 	border: 1px solid #ccc;
 `
 
-class Card extends Component {
+class CardWrapper extends Component {
 	constructor(props) {
 		super()
 
@@ -38,7 +42,7 @@ class Card extends Component {
 			.then(resp => resp.json())
 			.then(() => {
 				this.props.updateTotalDonate(amount)
-				this.props.updateMessage(`Thanks for donate ${amount}!`)
+				this.props.updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
 				setTimeout(() => {
 					this.props.updateMessage(``)
 				}, 2000)
@@ -50,14 +54,16 @@ class Card extends Component {
 		const { selectedAmount } = this.state
 
 		return (
-			<Wrapper>
-				<p>{item.name}</p>
-				<Payments setAmount={this.handleSetAmount} />
-				<button
-					onClick={() =>
-						this.handlePay(item.id, selectedAmount, item.currency)}>
-					Pay
-				</button>
+			<Wrapper className="column is-half">
+				<Card>
+					<p>{item.name}</p>
+					<Payments setAmount={this.handleSetAmount} />
+					<button
+						onClick={() =>
+							this.handlePay(item.id, selectedAmount, item.currency)}>
+						Pay
+					</button>
+				</Card>
 			</Wrapper>
 		)
 	}
@@ -66,4 +72,4 @@ class Card extends Component {
 const mapDispatchToProps = dispatch =>
 	bindActionCreators({ updateTotalDonate, updateMessage }, dispatch)
 
-export default connect(null, mapDispatchToProps)(Card)
+export default connect(null, mapDispatchToProps)(CardWrapper)
