@@ -11,6 +11,10 @@ const Card = styled.div`
 	position: relative;
 	border-radius: 4px;
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+	@media screen and (max-width: 540px) and (orientation: portrait) {
+		height: 200px;
+	}
 `
 
 const Img = styled.div`
@@ -20,6 +24,10 @@ const Img = styled.div`
 	background-position: center;
 	background-size: cover;
 	border-radius: 4px 4px 0 0;
+
+	@media screen and (max-width: 540px) and (orientation: portrait) {
+		height: 150px;
+	}
 `
 
 const Content = styled.div`
@@ -28,6 +36,10 @@ const Content = styled.div`
 	justify-content: space-between;
 	align-items: center;
 	padding: 20px;
+
+	@media screen and (max-width: 540px) and (orientation: portrait) {
+		height: calc(100% - 150px);
+	}
 `
 
 const Name = styled.div`

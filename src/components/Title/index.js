@@ -7,7 +7,18 @@ const Wrapper = styled.div`
 	min-height: 80px;
 	display: flex;
 	justify-content: space-between;
-	margin: 30px 0 20px;
+	margin: 1.5rem 0 1rem;
+
+	@media screen and (max-width: 1087px) {
+		padding: 0 0.75rem;
+	}
+
+	@media screen and (max-width: 768px) {
+		min-height: 85px;
+		flex-direction: column;
+		justify-content: flex-start;
+		margin: 0.75rem 0;
+	}
 `
 
 const Name = styled.h1`
@@ -18,10 +29,19 @@ const Name = styled.h1`
 	.omise {
 		color: ${props => props.theme.primary};
 	}
+
+	@media screen and (max-width: 768px) {
+		font-size: 20px;
+		margin-bottom: 8px;
+	}
 `
 
 const Donations = styled.div`
 	text-align: right;
+
+	@media screen and (max-width: 768px) {
+		text-align: left;
+	}
 `
 
 const Amount = styled.div`
@@ -33,11 +53,25 @@ const Amount = styled.div`
 		min-width: 100px;
 		margin-left: 5px;
 	}
+
+	@media screen and (max-width: 768px) {
+		font-size: 16px;
+		color: ${props => props.theme.neutral};
+
+		.amount {
+			min-width: auto;
+		}
+	}
 `
 
 const Message = styled.p`
 	font-weight: 600;
 	color: ${props => props.theme.primary};
+
+	@media screen and (max-width: 768px) {
+		font-size: 14px;
+		font-weight: 400;
+	}
 `
 
 class Title extends Component {

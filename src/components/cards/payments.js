@@ -66,7 +66,7 @@ class Payments extends Component {
 		super()
 
 		this.state = {
-			selectedAmount: 10
+			selectedAmount: 0
 		}
 
 		this.handleSetAmount = this.handleSetAmount.bind(this)
@@ -80,20 +80,24 @@ class Payments extends Component {
 	handlePay(id, amount, currency) {
 		const { updateTotalDonate, updateMessage, close } = this.props
 
-		fetch('http://localhost:3001/payments', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ charitiesId: id, amount, currency })
-		})
-			.then(resp => resp.json())
-			.then(() => {
-				close()
-				updateTotalDonate(amount)
-				updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
-				setTimeout(() => {
-					updateMessage(``)
-				}, 2000)
+		if (amount > 0) {
+			fetch('http://localhost:3001/payments', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ charitiesId: id, amount, currency })
 			})
+				.then(resp => resp.json())
+				.then(() => {
+					close()
+					updateTotalDonate(amount)
+					updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
+					setTimeout(() => {
+						updateMessage(``)
+					}, 2000)
+				})
+		} else {
+			close()
+		}
 	}
 
 	render() {

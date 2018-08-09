@@ -10,6 +10,10 @@ import { summaryDonations } from '../../helpers'
 import Card from './card'
 
 const Columns = styled.div`
+	@media screen and (max-width: 1087px) {
+		margin: 0 !important;
+	}
+
 	@media screen and (min-width: 769px) {
 		flex-flow: row wrap;
 	}
