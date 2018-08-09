@@ -99,7 +99,7 @@ class Payments extends Component {
 				.then(() => {
 					updateTotalDonate(amount)
 					updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
-					this.setState({ selectedAmount: 0, warning: false })
+					this.setState({ warning: false })
 
 					setTimeout(() => {
 						updateMessage(``)
@@ -123,6 +123,7 @@ class Payments extends Component {
 						<Radio
 							key={index}
 							amount={amount}
+							selectedAmount={selectedAmount}
 							setAmount={this.handleSetAmount}
 						/>
 					))}

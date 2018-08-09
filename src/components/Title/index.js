@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import styled, { withTheme } from 'styled-components'
 import { connect } from 'react-redux'
 import { toCurrency } from '../../helpers'
+import CountUp from 'react-countup'
 
 const Wrapper = styled.div`
 	height: 120px;
@@ -90,7 +91,9 @@ class Title extends Component {
 		super()
 
 		this.state = {
-			top: true
+			top: true,
+			prevDonate: 0,
+			donate: 0
 		}
 
 		this.handleScroll = this.handleScroll.bind(this)
@@ -100,14 +103,21 @@ class Title extends Component {
 		window.addEventListener('scroll', this.handleScroll)
 	}
 
+	componentWillReceiveProps(nextProps) {
+		this.setState({
+			prevDonate: this.props.donate,
+			donate: nextProps.donate
+		})
+	}
+
 	handleScroll(event) {
 		const top = window.scrollY > 0 ? false : true
 		this.setState({ top })
 	}
 
 	render() {
-		const { theme, donate, message } = this.props
-		const { top } = this.state
+		const { theme, message } = this.props
+		const { top, prevDonate, donate } = this.state
 
 		return (
 			<Wrapper theme={theme} top={top}>
@@ -117,7 +127,14 @@ class Title extends Component {
 					</Name>
 					<Donations>
 						<Amount theme={theme}>
-							All donations: <div className="amount">{toCurrency(donate)}</div>
+							All donations:
+							<CountUp
+								className="amount"
+								start={prevDonate}
+								end={donate}
+								duration={1}
+								redraw={true}
+							/>
 						</Amount>
 						<Message theme={theme}>{message}</Message>
 					</Donations>

@@ -60,11 +60,16 @@ const Span = styled.span`
 
 class Radio extends Component {
 	render() {
-		const { theme, amount, setAmount } = this.props
+		const { theme, amount, selectedAmount, setAmount } = this.props
 
 		return (
 			<Label theme={theme}>
-				<Input type="radio" name="payment" onClick={() => setAmount(amount)} />
+				<Input
+					type="radio"
+					name="payment"
+					checked={selectedAmount === amount && true}
+					onClick={() => setAmount(amount)}
+				/>
 				<Span className="checkmark" />
 				{toCurrency(amount)}
 			</Label>
