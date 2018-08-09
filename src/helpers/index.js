@@ -5,5 +5,5 @@ export const summaryDonations = danations => {
 }
 
 export const toCurrency = amount => {
-	return amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
+	return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }

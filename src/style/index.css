@@ -9,6 +9,14 @@
 @font-face {
 	font-family: 'Open_Sans';
 	font-style: bold;
+	font-weight: 500;
+	src: local('Open_Sans'), local('OpenSans-SemiBold'),
+		url('/fonts/Open_Sans/OpenSans-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Open_Sans';
+	font-style: bold;
 	font-weight: 600;
 	src: local('Open_Sans'), local('OpenSans-Bold'),
 		url('/fonts/Open_Sans/OpenSans-Bold.ttf') format('truetype');

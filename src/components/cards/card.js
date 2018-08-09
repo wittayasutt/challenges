@@ -1,20 +1,37 @@
 import React, { Component } from 'react'
-import { bindActionCreators } from 'redux'
-import { connect } from 'react-redux'
 import styled from 'styled-components'
-import fetch from 'isomorphic-fetch'
 
-import { updateTotalDonate, updateMessage } from '../../actions'
-import { toCurrency } from '../../helpers'
-
+import Button from '../atoms/button'
 import Payments from './payments'
 
 const Wrapper = styled.div``
 
 const Card = styled.div`
-	height: 300px;
+	height: 350px;
+	position: relative;
+	border-radius: 4px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`
 
-	border: 1px solid #ccc;
+const Img = styled.div`
+	height: 280px;
+	width: 100%;
+	background: url('/images/${props => props.image}');
+	background-position: center;
+	background-size: cover;
+	border-radius: 4px 4px 0 0;
+`
+
+const Content = styled.div`
+	height: calc(100% - 280px);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px;
+`
+
+const Name = styled.div`
+	font-weight: 500;
 `
 
 class CardWrapper extends Component {
@@ -22,54 +39,34 @@ class CardWrapper extends Component {
 		super()
 
 		this.state = {
-			selectedAmount: 10
+			open: false
 		}
 
-		this.handleSetAmount = this.handleSetAmount.bind(this)
-		this.handlePay = this.handlePay.bind(this)
+		this.handleToggle = this.handleToggle.bind(this)
 	}
 
-	handleSetAmount(amout) {
-		this.setState({ selectedAmount: amout })
-	}
-
-	handlePay(id, amount, currency) {
-		fetch('http://localhost:3001/payments', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ charitiesId: id, amount, currency })
-		})
-			.then(resp => resp.json())
-			.then(() => {
-				this.props.updateTotalDonate(amount)
-				this.props.updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
-				setTimeout(() => {
-					this.props.updateMessage(``)
-				}, 2000)
-			})
+	handleToggle() {
+		const open = !this.state.open
+		this.setState({ open })
 	}
 
 	render() {
 		const { item } = this.props
-		const { selectedAmount } = this.state
+		const { open } = this.state
 
 		return (
 			<Wrapper className="column is-half">
 				<Card>
-					<p>{item.name}</p>
-					<Payments setAmount={this.handleSetAmount} />
-					<button
-						onClick={() =>
-							this.handlePay(item.id, selectedAmount, item.currency)}>
-						Pay
-					</button>
+					<Img image={item.image} />
+					<Content>
+						<Name>{item.name}</Name>
+						<Button onClick={() => this.handleToggle()}>Donate</Button>
+					</Content>
+					<Payments item={item} open={open} close={this.handleToggle} />
 				</Card>
 			</Wrapper>
 		)
 	}
 }
 
-const mapDispatchToProps = dispatch =>
-	bindActionCreators({ updateTotalDonate, updateMessage }, dispatch)
-
-export default connect(null, mapDispatchToProps)(CardWrapper)
+export default CardWrapper

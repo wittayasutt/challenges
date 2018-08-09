@@ -30,7 +30,7 @@ const Amount = styled.div`
 	color: ${props => props.theme.dark};
 
 	.amount {
-		min-width: 135px;
+		min-width: 100px;
 		margin-left: 5px;
 	}
 `

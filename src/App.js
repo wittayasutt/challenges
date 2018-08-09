@@ -2,6 +2,12 @@ import React, { Component } from 'react'
 import styled, { ThemeProvider } from 'styled-components'
 import theme from './style/theme'
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTimes } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faTimes)
+
 import Title from './components/title'
 import Cards from './components/cards'
 
@@ -21,3 +27,4 @@ class App extends Component {
 }
 
 export default App
+
