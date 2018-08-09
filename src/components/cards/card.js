@@ -11,6 +11,12 @@ const Card = styled.div`
 	position: relative;
 	border-radius: 4px;
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+	transition: 0.4s;
+	cursor: pointer;
+
+	:hover {
+		box-shadow: 0 4px 10px 1px rgba(0, 0, 0, 0.2);
+	}
 
 	@media screen and (max-width: 540px) and (orientation: portrait) {
 		height: 200px;
@@ -54,12 +60,16 @@ class CardWrapper extends Component {
 			open: false
 		}
 
-		this.handleToggle = this.handleToggle.bind(this)
+		this.handleMouseEnter = this.handleMouseEnter.bind(this)
+		this.handleMouseLeave = this.handleMouseLeave.bind(this)
 	}
 
-	handleToggle() {
-		const open = !this.state.open
-		this.setState({ open })
+	handleMouseEnter() {
+		this.setState({ open: true })
+	}
+
+	handleMouseLeave() {
+		this.setState({ open: false })
 	}
 
 	render() {
@@ -68,13 +78,15 @@ class CardWrapper extends Component {
 
 		return (
 			<Wrapper className="column is-half">
-				<Card>
+				<Card
+					onMouseEnter={this.handleMouseEnter}
+					onMouseLeave={this.handleMouseLeave}>
 					<Img image={item.image} />
 					<Content>
 						<Name>{item.name}</Name>
-						<Button onClick={() => this.handleToggle()}>Donate</Button>
+						<Button>Donate</Button>
 					</Content>
-					<Payments item={item} open={open} close={this.handleToggle} />
+					<Payments item={item} open={open} />
 				</Card>
 			</Wrapper>
 		)

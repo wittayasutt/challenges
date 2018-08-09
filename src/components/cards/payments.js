@@ -61,12 +61,21 @@ const Close = styled(FontAwesomeIcon)`
 	font-size: 12px;
 `
 
+const Warning = styled.div`
+	position: absolute;
+	bottom: 10px;
+	font-size: 14px;
+	font-weight: 500;
+	color: ${props => props.theme.primary};
+`
+
 class Payments extends Component {
 	constructor(props) {
 		super()
 
 		this.state = {
-			selectedAmount: 0
+			selectedAmount: 0,
+			warning: false
 		}
 
 		this.handleSetAmount = this.handleSetAmount.bind(this)
@@ -78,7 +87,7 @@ class Payments extends Component {
 	}
 
 	handlePay(id, amount, currency) {
-		const { updateTotalDonate, updateMessage, close } = this.props
+		const { updateTotalDonate, updateMessage } = this.props
 
 		if (amount > 0) {
 			fetch('http://localhost:3001/payments', {
@@ -88,21 +97,22 @@ class Payments extends Component {
 			})
 				.then(resp => resp.json())
 				.then(() => {
-					close()
 					updateTotalDonate(amount)
 					updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
+					this.setState({ selectedAmount: 0, warning: false })
+
 					setTimeout(() => {
 						updateMessage(``)
 					}, 2000)
 				})
 		} else {
-			close()
+			this.setState({ warning: true })
 		}
 	}
 
 	render() {
-		const { theme, item, open, close } = this.props
-		const { selectedAmount } = this.state
+		const { theme, item, open } = this.props
+		const { selectedAmount, warning } = this.state
 		const { payment } = config
 
 		return (
@@ -122,9 +132,15 @@ class Payments extends Component {
 						this.handlePay(item.id, selectedAmount, item.currency)}>
 					Pay
 				</Button>
-				<CloseWrapper onClick={() => close()}>
+				{/* <CloseWrapper onClick={() => close()}>
 					<Close icon="times" />
-				</CloseWrapper>
+				</CloseWrapper> */}
+				{selectedAmount === 0 &&
+					warning && (
+						<Warning theme={theme}>
+							Please select your amount to donate.
+						</Warning>
+					)}
 			</Wrapper>
 		)
 	}
