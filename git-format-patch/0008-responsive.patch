@@ -1,0 +1,188 @@
+From a54b3cbf2c0d0e9918ceaeeae82e3bf03d2887df Mon Sep 17 00:00:00 2001
+From: wittayasutt <wittayasutt@gmail.com>
+Date: Fri, 10 Aug 2018 03:26:14 +0700
+Subject: [PATCH 08/12] responsive
+
+---
+ src/components/Title/index.js    | 36 +++++++++++++++++++++++++++++++++++-
+ src/components/cards/card.js     | 12 ++++++++++++
+ src/components/cards/index.js    |  4 ++++
+ src/components/cards/payments.js | 32 ++++++++++++++++++--------------
+ 4 files changed, 69 insertions(+), 15 deletions(-)
+
+diff --git a/src/components/Title/index.js b/src/components/Title/index.js
+index bc89f6c..27158a0 100644
+--- a/src/components/Title/index.js
++++ b/src/components/Title/index.js
+@@ -7,7 +7,18 @@ const Wrapper = styled.div`
+ 	min-height: 80px;
+ 	display: flex;
+ 	justify-content: space-between;
+-	margin: 30px 0 20px;
++	margin: 1.5rem 0 1rem;
++
++	@media screen and (max-width: 1087px) {
++		padding: 0 0.75rem;
++	}
++
++	@media screen and (max-width: 768px) {
++		min-height: 85px;
++		flex-direction: column;
++		justify-content: flex-start;
++		margin: 0.75rem 0;
++	}
+ `
+ 
+ const Name = styled.h1`
+@@ -18,10 +29,19 @@ const Name = styled.h1`
+ 	.omise {
+ 		color: ${props => props.theme.primary};
+ 	}
++
++	@media screen and (max-width: 768px) {
++		font-size: 20px;
++		margin-bottom: 8px;
++	}
+ `
+ 
+ const Donations = styled.div`
+ 	text-align: right;
++
++	@media screen and (max-width: 768px) {
++		text-align: left;
++	}
+ `
+ 
+ const Amount = styled.div`
+@@ -33,11 +53,25 @@ const Amount = styled.div`
+ 		min-width: 100px;
+ 		margin-left: 5px;
+ 	}
++
++	@media screen and (max-width: 768px) {
++		font-size: 16px;
++		color: ${props => props.theme.neutral};
++
++		.amount {
++			min-width: auto;
++		}
++	}
+ `
+ 
+ const Message = styled.p`
+ 	font-weight: 600;
+ 	color: ${props => props.theme.primary};
++
++	@media screen and (max-width: 768px) {
++		font-size: 14px;
++		font-weight: 400;
++	}
+ `
+ 
+ class Title extends Component {
+diff --git a/src/components/cards/card.js b/src/components/cards/card.js
+index cd0adb0..decc241 100644
+--- a/src/components/cards/card.js
++++ b/src/components/cards/card.js
+@@ -11,6 +11,10 @@ const Card = styled.div`
+ 	position: relative;
+ 	border-radius: 4px;
+ 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
++
++	@media screen and (max-width: 540px) and (orientation: portrait) {
++		height: 200px;
++	}
+ `
+ 
+ const Img = styled.div`
+@@ -20,6 +24,10 @@ const Img = styled.div`
+ 	background-position: center;
+ 	background-size: cover;
+ 	border-radius: 4px 4px 0 0;
++
++	@media screen and (max-width: 540px) and (orientation: portrait) {
++		height: 150px;
++	}
+ `
+ 
+ const Content = styled.div`
+@@ -28,6 +36,10 @@ const Content = styled.div`
+ 	justify-content: space-between;
+ 	align-items: center;
+ 	padding: 20px;
++
++	@media screen and (max-width: 540px) and (orientation: portrait) {
++		height: calc(100% - 150px);
++	}
+ `
+ 
+ const Name = styled.div`
+diff --git a/src/components/cards/index.js b/src/components/cards/index.js
+index dc5828e..831194b 100644
+--- a/src/components/cards/index.js
++++ b/src/components/cards/index.js
+@@ -10,6 +10,10 @@ import { summaryDonations } from '../../helpers'
+ import Card from './card'
+ 
+ const Columns = styled.div`
++	@media screen and (max-width: 1087px) {
++		margin: 0 !important;
++	}
++
+ 	@media screen and (min-width: 769px) {
+ 		flex-flow: row wrap;
+ 	}
+diff --git a/src/components/cards/payments.js b/src/components/cards/payments.js
+index 71db85d..8b22471 100644
+--- a/src/components/cards/payments.js
++++ b/src/components/cards/payments.js
+@@ -66,7 +66,7 @@ class Payments extends Component {
+ 		super()
+ 
+ 		this.state = {
+-			selectedAmount: 10
++			selectedAmount: 0
+ 		}
+ 
+ 		this.handleSetAmount = this.handleSetAmount.bind(this)
+@@ -80,20 +80,24 @@ class Payments extends Component {
+ 	handlePay(id, amount, currency) {
+ 		const { updateTotalDonate, updateMessage, close } = this.props
+ 
+-		fetch('http://localhost:3001/payments', {
+-			method: 'POST',
+-			headers: { 'Content-Type': 'application/json' },
+-			body: JSON.stringify({ charitiesId: id, amount, currency })
+-		})
+-			.then(resp => resp.json())
+-			.then(() => {
+-				close()
+-				updateTotalDonate(amount)
+-				updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
+-				setTimeout(() => {
+-					updateMessage(``)
+-				}, 2000)
++		if (amount > 0) {
++			fetch('http://localhost:3001/payments', {
++				method: 'POST',
++				headers: { 'Content-Type': 'application/json' },
++				body: JSON.stringify({ charitiesId: id, amount, currency })
+ 			})
++				.then(resp => resp.json())
++				.then(() => {
++					close()
++					updateTotalDonate(amount)
++					updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
++					setTimeout(() => {
++						updateMessage(``)
++					}, 2000)
++				})
++		} else {
++			close()
++		}
+ 	}
+ 
+ 	render() {
+-- 
+2.8.1.windows.1
+

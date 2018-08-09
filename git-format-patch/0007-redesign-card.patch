@@ -1,0 +1,865 @@
+From bd7943acce9b25ebde1dfd1b6e99f4b30771674a Mon Sep 17 00:00:00 2001
+From: wittayasutt <wittayasutt@gmail.com>
+Date: Fri, 10 Aug 2018 02:54:21 +0700
+Subject: [PATCH 07/12] redesign card
+
+---
+ db.json                              | 322 ++++++++---------------------------
+ package.json                         |   3 +
+ src/App.js                           |   7 +
+ src/components/Title/index.js        |   2 +-
+ src/components/atoms/button/index.js |  32 ++++
+ src/components/atoms/radio/index.js  |  75 ++++++++
+ src/components/cards/card.js         |  79 +++++----
+ src/components/cards/payments.js     | 136 +++++++++++++--
+ src/helpers/index.js                 |   2 +-
+ src/style/index.css                  |   8 +
+ yarn.lock                            |  27 +++
+ 11 files changed, 385 insertions(+), 308 deletions(-)
+ create mode 100644 src/components/atoms/button/index.js
+ create mode 100644 src/components/atoms/radio/index.js
+
+diff --git a/db.json b/db.json
+index 1fdf5e7..4650911 100644
+--- a/db.json
++++ b/db.json
+@@ -1,252 +1,72 @@
+ {
+-  "charities": [
+-    {
+-      "id": 1,
+-      "name": "Baan Kru Noi",
+-      "image": "baan-kru-noi.jpg",
+-      "currency": "THB"
+-    },
+-    {
+-      "id": 2,
+-      "name": "Habitat for Humanity Thailand",
+-      "image": "habitat-for-humanity-thailand.jpg",
+-      "currency": "THB"
+-    },
+-    {
+-      "id": 3,
+-      "name": "Paper Ranger",
+-      "image": "paper-ranger.jpg",
+-      "currency": "THB"
+-    },
+-    {
+-      "id": 4,
+-      "name": "Makhampom Theater",
+-      "image": "makhampom-theater.jpg",
+-      "currency": "THB"
+-    },
+-    {
+-      "id": 5,
+-      "name": "Thailand Association of the Blind",
+-      "image": "thailand-association-of-the-blind.jpg",
+-      "currency": "THB"
+-    }
+-  ],
+-  "payments": [
+-    {
+-      "charitiesId": 2,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 1
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 2
+-    },
+-    {
+-      "charitiesId": 3,
+-      "amount": 50,
+-      "currency": "THB",
+-      "id": 3
+-    },
+-    {
+-      "charitiesId": 4,
+-      "amount": 100,
+-      "currency": "THB",
+-      "id": 4
+-    },
+-    {
+-      "charitiesId": 2,
+-      "amount": 500,
+-      "currency": "THB",
+-      "id": 5
+-    },
+-    {
+-      "charitiesId": 5,
+-      "amount": 500,
+-      "currency": "THB",
+-      "id": 6
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 100,
+-      "currency": "THB",
+-      "id": 7
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 500,
+-      "currency": "THB",
+-      "id": 8
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 9
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 10
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 500,
+-      "currency": "THB",
+-      "id": 11
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 12
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 13
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 50,
+-      "currency": "THB",
+-      "id": 14
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 15
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 16
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 17
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 50,
+-      "currency": "THB",
+-      "id": 18
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 19
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 20
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 50,
+-      "currency": "THB",
+-      "id": 21
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 22
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 100,
+-      "currency": "THB",
+-      "id": 23
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 24
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 25
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 26
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 50,
+-      "currency": "THB",
+-      "id": 27
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 100,
+-      "currency": "THB",
+-      "id": 28
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 29
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 500,
+-      "currency": "THB",
+-      "id": 30
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 31
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 32
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 50,
+-      "currency": "THB",
+-      "id": 33
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 50,
+-      "currency": "THB",
+-      "id": 34
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 35
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 36
+-    }
+-  ]
+-}
+\ No newline at end of file
++	"charities": [
++		{
++			"id": 1,
++			"name": "Baan Kru Noi",
++			"image": "baan-kru-noi.jpg",
++			"currency": "THB"
++		},
++		{
++			"id": 2,
++			"name": "Habitat for Humanity Thailand",
++			"image": "habitat-for-humanity-thailand.jpg",
++			"currency": "THB"
++		},
++		{
++			"id": 3,
++			"name": "Paper Ranger",
++			"image": "paper-ranger.jpg",
++			"currency": "THB"
++		},
++		{
++			"id": 4,
++			"name": "Makhampom Theater",
++			"image": "makhampom-theater.jpg",
++			"currency": "THB"
++		},
++		{
++			"id": 5,
++			"name": "Thailand Association of the Blind",
++			"image": "thailand-association-of-the-blind.jpg",
++			"currency": "THB"
++		}
++	],
++	"payments": [
++		{
++			"charitiesId": 2,
++			"amount": 10,
++			"currency": "THB",
++			"id": 1
++		},
++		{
++			"charitiesId": 1,
++			"amount": 20,
++			"currency": "THB",
++			"id": 2
++		},
++		{
++			"charitiesId": 3,
++			"amount": 50,
++			"currency": "THB",
++			"id": 3
++		},
++		{
++			"charitiesId": 4,
++			"amount": 100,
++			"currency": "THB",
++			"id": 4
++		},
++		{
++			"charitiesId": 2,
++			"amount": 500,
++			"currency": "THB",
++			"id": 5
++		},
++		{
++			"charitiesId": 5,
++			"amount": 500,
++			"currency": "THB",
++			"id": 6
++		}
++	]
++}
+diff --git a/package.json b/package.json
+index f56ba18..2f591c5 100644
+--- a/package.json
++++ b/package.json
+@@ -12,6 +12,9 @@
+ 		"test": "jest"
+ 	},
+ 	"dependencies": {
++		"@fortawesome/fontawesome-svg-core": "^1.2.2",
++		"@fortawesome/free-solid-svg-icons": "^5.2.0",
++		"@fortawesome/react-fontawesome": "^0.1.1",
+ 		"bulma": "^0.7.1",
+ 		"isomorphic-fetch": "^2.2.1",
+ 		"react": "^16.0.0",
+diff --git a/src/App.js b/src/App.js
+index b051162..4369e61 100644
+--- a/src/App.js
++++ b/src/App.js
+@@ -2,6 +2,12 @@ import React, { Component } from 'react'
+ import styled, { ThemeProvider } from 'styled-components'
+ import theme from './style/theme'
+ 
++import { library } from '@fortawesome/fontawesome-svg-core'
++import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
++import { faTimes } from '@fortawesome/free-solid-svg-icons'
++
++library.add(faTimes)
++
+ import Title from './components/title'
+ import Cards from './components/cards'
+ 
+@@ -21,3 +27,4 @@ class App extends Component {
+ }
+ 
+ export default App
++
+diff --git a/src/components/Title/index.js b/src/components/Title/index.js
+index 5dbcfa1..bc89f6c 100644
+--- a/src/components/Title/index.js
++++ b/src/components/Title/index.js
+@@ -30,7 +30,7 @@ const Amount = styled.div`
+ 	color: ${props => props.theme.dark};
+ 
+ 	.amount {
+-		min-width: 135px;
++		min-width: 100px;
+ 		margin-left: 5px;
+ 	}
+ `
+diff --git a/src/components/atoms/button/index.js b/src/components/atoms/button/index.js
+new file mode 100644
+index 0000000..107d1e1
+--- /dev/null
++++ b/src/components/atoms/button/index.js
+@@ -0,0 +1,32 @@
++import React, { Component } from 'react'
++import styled, { withTheme } from 'styled-components'
++
++const Wrapper = styled.div`
++	font-size: 14px;
++	font-weight: 500;
++	color: ${props => props.theme.primary};
++	border: 1px solid ${props => props.theme.primary};
++	border-radius: 3px;
++	padding: 1px 5px;
++	transition: 0.4s;
++	cursor: pointer;
++
++	:hover {
++		color: #ffffff;
++		background: ${props => props.theme.primary};
++	}
++`
++
++class Button extends Component {
++	render() {
++		const { theme, children, onClick } = this.props
++
++		return (
++			<Wrapper theme={theme} onClick={onClick}>
++				{children}
++			</Wrapper>
++		)
++	}
++}
++
++export default withTheme(Button)
+diff --git a/src/components/atoms/radio/index.js b/src/components/atoms/radio/index.js
+new file mode 100644
+index 0000000..4372260
+--- /dev/null
++++ b/src/components/atoms/radio/index.js
+@@ -0,0 +1,75 @@
++import React, { Component } from 'react'
++import styled, { withTheme } from 'styled-components'
++import { toCurrency } from '../../../helpers'
++
++const Label = styled.label`
++	position: relative;
++	font-size: 14px;
++	font-weight: 500;
++	margin: 7px;
++	padding-left: 18px;
++	cursor: pointer;
++
++	-webkit-user-select: none;
++	-moz-user-select: none;
++	-ms-user-select: none;
++	user-select: none;
++
++	input {
++		position: absolute;
++		opacity: 0;
++		cursor: pointer;
++	}
++
++	:hover input ~ .checkmark,
++	input:checked ~ .checkmark {
++		border: 4.5px solid ${props => props.theme.primary};
++	}
++
++	.checkmark:after {
++		top: 9px;
++		left: 9px;
++		width: 8px;
++		height: 8px;
++		border-radius: 50%;
++		background: white;
++	}
++`
++
++const Input = styled.input`
++	display: none;
++`
++
++const Span = styled.span`
++	height: 12px;
++	width: 12px;
++	position: absolute;
++	top: 3px;
++	left: 0;
++	background-color: #ffffff;
++	border-radius: 50%;
++	border: 1px solid #c6c6c6;
++	transition: 0.2s;
++
++	:after {
++		content: '';
++		position: absolute;
++		display: none;
++	}
++`
++
++class Radio extends Component {
++	render() {
++		const { theme, amount, setAmount } = this.props
++
++		return (
++			<Label theme={theme}>
++				<Input type="radio" name="payment" onClick={() => setAmount(amount)} />
++				<Span className="checkmark" />
++				{toCurrency(amount)}
++			</Label>
++		)
++	}
++}
++
++export default withTheme(Radio)
+diff --git a/src/components/cards/card.js b/src/components/cards/card.js
+index f776cf5..cd0adb0 100644
+--- a/src/components/cards/card.js
++++ b/src/components/cards/card.js
+@@ -1,20 +1,37 @@
+ import React, { Component } from 'react'
+-import { bindActionCreators } from 'redux'
+-import { connect } from 'react-redux'
+ import styled from 'styled-components'
+-import fetch from 'isomorphic-fetch'
+-
+-import { updateTotalDonate, updateMessage } from '../../actions'
+-import { toCurrency } from '../../helpers'
+ 
++import Button from '../atoms/button'
+ import Payments from './payments'
+ 
+ const Wrapper = styled.div``
+ 
+ const Card = styled.div`
+-	height: 300px;
++	height: 350px;
++	position: relative;
++	border-radius: 4px;
++	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
++`
+ 
+-	border: 1px solid #ccc;
++const Img = styled.div`
++	height: 280px;
++	width: 100%;
++	background: url('/images/${props => props.image}');
++	background-position: center;
++	background-size: cover;
++	border-radius: 4px 4px 0 0;
++`
++
++const Content = styled.div`
++	height: calc(100% - 280px);
++	display: flex;
++	justify-content: space-between;
++	align-items: center;
++	padding: 20px;
++`
++
++const Name = styled.div`
++	font-weight: 500;
+ `
+ 
+ class CardWrapper extends Component {
+@@ -22,54 +39,34 @@ class CardWrapper extends Component {
+ 		super()
+ 
+ 		this.state = {
+-			selectedAmount: 10
++			open: false
+ 		}
+ 
+-		this.handleSetAmount = this.handleSetAmount.bind(this)
+-		this.handlePay = this.handlePay.bind(this)
+-	}
+-
+-	handleSetAmount(amout) {
+-		this.setState({ selectedAmount: amout })
++		this.handleToggle = this.handleToggle.bind(this)
+ 	}
+ 
+-	handlePay(id, amount, currency) {
+-		fetch('http://localhost:3001/payments', {
+-			method: 'POST',
+-			headers: { 'Content-Type': 'application/json' },
+-			body: JSON.stringify({ charitiesId: id, amount, currency })
+-		})
+-			.then(resp => resp.json())
+-			.then(() => {
+-				this.props.updateTotalDonate(amount)
+-				this.props.updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
+-				setTimeout(() => {
+-					this.props.updateMessage(``)
+-				}, 2000)
+-			})
++	handleToggle() {
++		const open = !this.state.open
++		this.setState({ open })
+ 	}
+ 
+ 	render() {
+ 		const { item } = this.props
+-		const { selectedAmount } = this.state
++		const { open } = this.state
+ 
+ 		return (
+ 			<Wrapper className="column is-half">
+ 				<Card>
+-					<p>{item.name}</p>
+-					<Payments setAmount={this.handleSetAmount} />
+-					<button
+-						onClick={() =>
+-							this.handlePay(item.id, selectedAmount, item.currency)}>
+-						Pay
+-					</button>
++					<Img image={item.image} />
++					<Content>
++						<Name>{item.name}</Name>
++						<Button onClick={() => this.handleToggle()}>Donate</Button>
++					</Content>
++					<Payments item={item} open={open} close={this.handleToggle} />
+ 				</Card>
+ 			</Wrapper>
+ 		)
+ 	}
+ }
+ 
+-const mapDispatchToProps = dispatch =>
+-	bindActionCreators({ updateTotalDonate, updateMessage }, dispatch)
+-
+-export default connect(null, mapDispatchToProps)(CardWrapper)
++export default CardWrapper
+diff --git a/src/components/cards/payments.js b/src/components/cards/payments.js
+index 6511e98..71db85d 100644
+--- a/src/components/cards/payments.js
++++ b/src/components/cards/payments.js
+@@ -1,24 +1,132 @@
+ import React, { Component } from 'react'
+-import styled from 'styled-components'
++import { bindActionCreators } from 'redux'
++import { connect } from 'react-redux'
++import styled, { withTheme } from 'styled-components'
++import fetch from 'isomorphic-fetch'
+ import config from '../../config'
+ 
++import { updateTotalDonate, updateMessage } from '../../actions'
++import { toCurrency } from '../../helpers'
++import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
++
++import Radio from '../atoms/radio'
++import Button from '../atoms/button'
++
++const Wrapper = styled.div`
++	height: 100%;
++	width: 100%;
++	position: absolute;
++	top: 0;
++	left: 0;
++	display: flex;
++	flex-direction: column;
++	justify-content: center;
++	align-items: center;
++	background: rgba(255, 255, 255, 0.95);
++
++	visibility: ${props => (props.open ? 'visible' : 'hidden')};
++	opacity: ${props => (props.open ? 1 : 0)};
++	transition: 0.4s;
++`
++
++const Title = styled.div`
++	font-size: 14px;
++	font-weight: 500;
++	margin-bottom: 10px;
++`
++
++const Select = styled.div`
++	margin-bottom: 12px;
++`
++
++const CloseWrapper = styled.div`
++	height: 50px;
++	width: 50px;
++	display: flex;
++	justify-content: center;
++	align-items: center;
++	position: absolute;
++	top: 0;
++	right: 0;
++	opacity: 0.7;
++	transition: 0.2s;
++	cursor: pointer;
++
++	:hover {
++		opacity: 1;
++	}
++`
++
++const Close = styled(FontAwesomeIcon)`
++	font-size: 12px;
++`
++
+ class Payments extends Component {
++	constructor(props) {
++		super()
++
++		this.state = {
++			selectedAmount: 10
++		}
++
++		this.handleSetAmount = this.handleSetAmount.bind(this)
++		this.handlePay = this.handlePay.bind(this)
++	}
++
++	handleSetAmount(amount) {
++		this.setState({ selectedAmount: amount })
++	}
++
++	handlePay(id, amount, currency) {
++		const { updateTotalDonate, updateMessage, close } = this.props
++
++		fetch('http://localhost:3001/payments', {
++			method: 'POST',
++			headers: { 'Content-Type': 'application/json' },
++			body: JSON.stringify({ charitiesId: id, amount, currency })
++		})
++			.then(resp => resp.json())
++			.then(() => {
++				close()
++				updateTotalDonate(amount)
++				updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
++				setTimeout(() => {
++					updateMessage(``)
++				}, 2000)
++			})
++	}
++
+ 	render() {
++		const { theme, item, open, close } = this.props
++		const { selectedAmount } = this.state
+ 		const { payment } = config
+ 
+-		const payments = payment.map((amount, index) => (
+-			<label key={index}>
+-				<input
+-					type="radio"
+-					name="payment"
+-					onClick={() => this.props.setAmount(amount)}
+-				/>
+-				{amount}
+-			</label>
+-		))
+-
+-		return <div>{payments}</div>
++		return (
++			<Wrapper open={open}>
++				<Title>Select the amount to donate (USD)</Title>
++				<Select>
++					{payment.map((amount, index) => (
++						<Radio
++							key={index}
++							amount={amount}
++							setAmount={this.handleSetAmount}
++						/>
++					))}
++				</Select>
++				<Button
++					onClick={() =>
++						this.handlePay(item.id, selectedAmount, item.currency)}>
++					Pay
++				</Button>
++				<CloseWrapper onClick={() => close()}>
++					<Close icon="times" />
++				</CloseWrapper>
++			</Wrapper>
++		)
+ 	}
+ }
+ 
+-export default Payments
++const mapDispatchToProps = dispatch =>
++	bindActionCreators({ updateTotalDonate, updateMessage }, dispatch)
++
++export default connect(null, mapDispatchToProps)(withTheme(Payments))
+diff --git a/src/helpers/index.js b/src/helpers/index.js
+index 93125fc..8cec119 100644
+--- a/src/helpers/index.js
++++ b/src/helpers/index.js
+@@ -5,5 +5,5 @@ export const summaryDonations = danations => {
+ }
+ 
+ export const toCurrency = amount => {
+-	return amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
++	return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+ }
+diff --git a/src/style/index.css b/src/style/index.css
+index 85cbd80..6f0b369 100644
+--- a/src/style/index.css
++++ b/src/style/index.css
+@@ -9,6 +9,14 @@
+ @font-face {
+ 	font-family: 'Open_Sans';
+ 	font-style: bold;
++	font-weight: 500;
++	src: local('Open_Sans'), local('OpenSans-SemiBold'),
++		url('/fonts/Open_Sans/OpenSans-SemiBold.ttf') format('truetype');
++}
++
++@font-face {
++	font-family: 'Open_Sans';
++	font-style: bold;
+ 	font-weight: 600;
+ 	src: local('Open_Sans'), local('OpenSans-Bold'),
+ 		url('/fonts/Open_Sans/OpenSans-Bold.ttf') format('truetype');
+diff --git a/yarn.lock b/yarn.lock
+index bb1b1e4..d69e623 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -2,6 +2,29 @@
+ # yarn lockfile v1
+ 
+ 
++"@fortawesome/fontawesome-common-types@^0.2.2":
++  version "0.2.2"
++  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-common-types/-/fontawesome-common-types-0.2.2.tgz#7fd64eacf7f64e4d7619d21b0b2f2467f5a70611"
++
++"@fortawesome/fontawesome-svg-core@^1.2.2":
++  version "1.2.2"
++  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-svg-core/-/fontawesome-svg-core-1.2.2.tgz#b431e7efb3e3a1887e596daa6ed0d241d2d1aea5"
++  dependencies:
++    "@fortawesome/fontawesome-common-types" "^0.2.2"
++
++"@fortawesome/free-solid-svg-icons@^5.2.0":
++  version "5.2.0"
++  resolved "https://registry.yarnpkg.com/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-5.2.0.tgz#b51c1d49278ef538a97c0ce9575a1b54cc1a52dc"
++  dependencies:
++    "@fortawesome/fontawesome-common-types" "^0.2.2"
++
++"@fortawesome/react-fontawesome@^0.1.1":
++  version "0.1.1"
++  resolved "https://registry.yarnpkg.com/@fortawesome/react-fontawesome/-/react-fontawesome-0.1.1.tgz#7e611e84fe914e3568d68ff37115e42d6caed425"
++  dependencies:
++    humps "^2.0.1"
++    prop-types "^15.5.10"
++
+ abab@^1.0.3:
+   version "1.0.4"
+   resolved "https://registry.yarnpkg.com/abab/-/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"
+@@ -2673,6 +2696,10 @@ https-browserify@0.0.1:
+   version "0.0.1"
+   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-0.0.1.tgz#3f91365cabe60b77ed0ebba24b454e3e09d95a82"
+ 
++humps@^2.0.1:
++  version "2.0.1"
++  resolved "https://registry.yarnpkg.com/humps/-/humps-2.0.1.tgz#dd02ea6081bd0568dc5d073184463957ba9ef9aa"
++
+ iconv-lite@0.4.13:
+   version "0.4.13"
+   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.13.tgz#1f88aba4ab0b1508e8312acc39345f36e992e2f2"
+-- 
+2.8.1.windows.1
+

@@ -1,0 +1,313 @@
+From cfd21fd718dda28f15c47ca4fc714451668bfaf7 Mon Sep 17 00:00:00 2001
+From: wittayasutt <wittayasutt@gmail.com>
+Date: Fri, 10 Aug 2018 04:41:00 +0700
+Subject: [PATCH 11/12] count up
+
+---
+ db.json                             | 142 ++++++++++++++++++------------------
+ package.json                        |   1 +
+ src/components/Title/index.js       |  25 ++++++-
+ src/components/atoms/radio/index.js |   9 ++-
+ src/components/cards/payments.js    |   3 +-
+ yarn.lock                           |  10 +++
+ 6 files changed, 112 insertions(+), 78 deletions(-)
+
+diff --git a/db.json b/db.json
+index 4650911..5ed647d 100644
+--- a/db.json
++++ b/db.json
+@@ -1,72 +1,72 @@
+ {
+-	"charities": [
+-		{
+-			"id": 1,
+-			"name": "Baan Kru Noi",
+-			"image": "baan-kru-noi.jpg",
+-			"currency": "THB"
+-		},
+-		{
+-			"id": 2,
+-			"name": "Habitat for Humanity Thailand",
+-			"image": "habitat-for-humanity-thailand.jpg",
+-			"currency": "THB"
+-		},
+-		{
+-			"id": 3,
+-			"name": "Paper Ranger",
+-			"image": "paper-ranger.jpg",
+-			"currency": "THB"
+-		},
+-		{
+-			"id": 4,
+-			"name": "Makhampom Theater",
+-			"image": "makhampom-theater.jpg",
+-			"currency": "THB"
+-		},
+-		{
+-			"id": 5,
+-			"name": "Thailand Association of the Blind",
+-			"image": "thailand-association-of-the-blind.jpg",
+-			"currency": "THB"
+-		}
+-	],
+-	"payments": [
+-		{
+-			"charitiesId": 2,
+-			"amount": 10,
+-			"currency": "THB",
+-			"id": 1
+-		},
+-		{
+-			"charitiesId": 1,
+-			"amount": 20,
+-			"currency": "THB",
+-			"id": 2
+-		},
+-		{
+-			"charitiesId": 3,
+-			"amount": 50,
+-			"currency": "THB",
+-			"id": 3
+-		},
+-		{
+-			"charitiesId": 4,
+-			"amount": 100,
+-			"currency": "THB",
+-			"id": 4
+-		},
+-		{
+-			"charitiesId": 2,
+-			"amount": 500,
+-			"currency": "THB",
+-			"id": 5
+-		},
+-		{
+-			"charitiesId": 5,
+-			"amount": 500,
+-			"currency": "THB",
+-			"id": 6
+-		}
+-	]
+-}
++  "charities": [
++    {
++      "id": 1,
++      "name": "Baan Kru Noi",
++      "image": "baan-kru-noi.jpg",
++      "currency": "THB"
++    },
++    {
++      "id": 2,
++      "name": "Habitat for Humanity Thailand",
++      "image": "habitat-for-humanity-thailand.jpg",
++      "currency": "THB"
++    },
++    {
++      "id": 3,
++      "name": "Paper Ranger",
++      "image": "paper-ranger.jpg",
++      "currency": "THB"
++    },
++    {
++      "id": 4,
++      "name": "Makhampom Theater",
++      "image": "makhampom-theater.jpg",
++      "currency": "THB"
++    },
++    {
++      "id": 5,
++      "name": "Thailand Association of the Blind",
++      "image": "thailand-association-of-the-blind.jpg",
++      "currency": "THB"
++    }
++  ],
++  "payments": [
++    {
++      "charitiesId": 2,
++      "amount": 10,
++      "currency": "THB",
++      "id": 1
++    },
++    {
++      "charitiesId": 1,
++      "amount": 20,
++      "currency": "THB",
++      "id": 2
++    },
++    {
++      "charitiesId": 3,
++      "amount": 50,
++      "currency": "THB",
++      "id": 3
++    },
++    {
++      "charitiesId": 4,
++      "amount": 100,
++      "currency": "THB",
++      "id": 4
++    },
++    {
++      "charitiesId": 2,
++      "amount": 500,
++      "currency": "THB",
++      "id": 5
++    },
++    {
++      "charitiesId": 5,
++      "amount": 500,
++      "currency": "THB",
++      "id": 6
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index 2f591c5..cde5dc7 100644
+--- a/package.json
++++ b/package.json
+@@ -18,6 +18,7 @@
+ 		"bulma": "^0.7.1",
+ 		"isomorphic-fetch": "^2.2.1",
+ 		"react": "^16.0.0",
++		"react-countup": "^3.0.3",
+ 		"react-dom": "^16.0.0",
+ 		"react-redux": "^5.0.6",
+ 		"redux": "^3.7.2",
+diff --git a/src/components/Title/index.js b/src/components/Title/index.js
+index e5bb60d..e9b6ae1 100644
+--- a/src/components/Title/index.js
++++ b/src/components/Title/index.js
+@@ -2,6 +2,7 @@ import React, { Component } from 'react'
+ import styled, { withTheme } from 'styled-components'
+ import { connect } from 'react-redux'
+ import { toCurrency } from '../../helpers'
++import CountUp from 'react-countup'
+ 
+ const Wrapper = styled.div`
+ 	height: 120px;
+@@ -90,7 +91,9 @@ class Title extends Component {
+ 		super()
+ 
+ 		this.state = {
+-			top: true
++			top: true,
++			prevDonate: 0,
++			donate: 0
+ 		}
+ 
+ 		this.handleScroll = this.handleScroll.bind(this)
+@@ -100,14 +103,21 @@ class Title extends Component {
+ 		window.addEventListener('scroll', this.handleScroll)
+ 	}
+ 
++	componentWillReceiveProps(nextProps) {
++		this.setState({
++			prevDonate: this.props.donate,
++			donate: nextProps.donate
++		})
++	}
++
+ 	handleScroll(event) {
+ 		const top = window.scrollY > 0 ? false : true
+ 		this.setState({ top })
+ 	}
+ 
+ 	render() {
+-		const { theme, donate, message } = this.props
+-		const { top } = this.state
++		const { theme, message } = this.props
++		const { top, prevDonate, donate } = this.state
+ 
+ 		return (
+ 			<Wrapper theme={theme} top={top}>
+@@ -117,7 +127,14 @@ class Title extends Component {
+ 					</Name>
+ 					<Donations>
+ 						<Amount theme={theme}>
+-							All donations: <div className="amount">{toCurrency(donate)}</div>
++							All donations:
++							<CountUp
++								className="amount"
++								start={prevDonate}
++								end={donate}
++								duration={1}
++								redraw={true}
++							/>
+ 						</Amount>
+ 						<Message theme={theme}>{message}</Message>
+ 					</Donations>
+diff --git a/src/components/atoms/radio/index.js b/src/components/atoms/radio/index.js
+index 4372260..d693689 100644
+--- a/src/components/atoms/radio/index.js
++++ b/src/components/atoms/radio/index.js
+@@ -60,11 +60,16 @@ const Span = styled.span`
+ 
+ class Radio extends Component {
+ 	render() {
+-		const { theme, amount, setAmount } = this.props
++		const { theme, amount, selectedAmount, setAmount } = this.props
+ 
+ 		return (
+ 			<Label theme={theme}>
+-				<Input type="radio" name="payment" onClick={() => setAmount(amount)} />
++				<Input
++					type="radio"
++					name="payment"
++					checked={selectedAmount === amount && true}
++					onClick={() => setAmount(amount)}
++				/>
+ 				<Span className="checkmark" />
+ 				{toCurrency(amount)}
+ 			</Label>
+diff --git a/src/components/cards/payments.js b/src/components/cards/payments.js
+index f90bd42..7b973f7 100644
+--- a/src/components/cards/payments.js
++++ b/src/components/cards/payments.js
+@@ -99,7 +99,7 @@ class Payments extends Component {
+ 				.then(() => {
+ 					updateTotalDonate(amount)
+ 					updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
+-					this.setState({ selectedAmount: 0, warning: false })
++					this.setState({ warning: false })
+ 
+ 					setTimeout(() => {
+ 						updateMessage(``)
+@@ -123,6 +123,7 @@ class Payments extends Component {
+ 						<Radio
+ 							key={index}
+ 							amount={amount}
++							selectedAmount={selectedAmount}
+ 							setAmount={this.handleSetAmount}
+ 						/>
+ 					))}
+diff --git a/yarn.lock b/yarn.lock
+index d69e623..d4f80bd 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -1445,6 +1445,10 @@ cors@^2.3.0:
+     object-assign "^4"
+     vary "^1"
+ 
++countup.js@^1.9.3:
++  version "1.9.3"
++  resolved "https://registry.yarnpkg.com/countup.js/-/countup.js-1.9.3.tgz#ce3e50cd7160441e478f07da31895edcc0f1c9dd"
++
+ create-ecdh@^4.0.0:
+   version "4.0.0"
+   resolved "https://registry.yarnpkg.com/create-ecdh/-/create-ecdh-4.0.0.tgz#888c723596cdf7612f6498233eebd7a35301737d"
+@@ -4373,6 +4377,12 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.1.7:
+     minimist "^1.2.0"
+     strip-json-comments "~2.0.1"
+ 
++react-countup@^3.0.3:
++  version "3.0.3"
++  resolved "https://registry.yarnpkg.com/react-countup/-/react-countup-3.0.3.tgz#e698a4e28964fe0322a925f52929e3b08db714fd"
++  dependencies:
++    countup.js "^1.9.3"
++
+ react-dom@^16.0.0:
+   version "16.0.0"
+   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.0.0.tgz#9cc3079c3dcd70d4c6e01b84aab2a7e34c303f58"
+-- 
+2.8.1.windows.1
+

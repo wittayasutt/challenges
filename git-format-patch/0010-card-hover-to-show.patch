@@ -1,0 +1,151 @@
+From c5b898544d54a1b46400b23c00815688464ca576 Mon Sep 17 00:00:00 2001
+From: wittayasutt <wittayasutt@gmail.com>
+Date: Fri, 10 Aug 2018 04:12:56 +0700
+Subject: [PATCH 10/12] card hover to show
+
+---
+ src/components/cards/card.js     | 26 +++++++++++++++++++-------
+ src/components/cards/payments.js | 32 ++++++++++++++++++++++++--------
+ 2 files changed, 43 insertions(+), 15 deletions(-)
+
+diff --git a/src/components/cards/card.js b/src/components/cards/card.js
+index decc241..c87ea7c 100644
+--- a/src/components/cards/card.js
++++ b/src/components/cards/card.js
+@@ -11,6 +11,12 @@ const Card = styled.div`
+ 	position: relative;
+ 	border-radius: 4px;
+ 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
++	transition: 0.4s;
++	cursor: pointer;
++
++	:hover {
++		box-shadow: 0 4px 10px 1px rgba(0, 0, 0, 0.2);
++	}
+ 
+ 	@media screen and (max-width: 540px) and (orientation: portrait) {
+ 		height: 200px;
+@@ -54,12 +60,16 @@ class CardWrapper extends Component {
+ 			open: false
+ 		}
+ 
+-		this.handleToggle = this.handleToggle.bind(this)
++		this.handleMouseEnter = this.handleMouseEnter.bind(this)
++		this.handleMouseLeave = this.handleMouseLeave.bind(this)
++	}
++
++	handleMouseEnter() {
++		this.setState({ open: true })
+ 	}
+ 
+-	handleToggle() {
+-		const open = !this.state.open
+-		this.setState({ open })
++	handleMouseLeave() {
++		this.setState({ open: false })
+ 	}
+ 
+ 	render() {
+@@ -68,13 +78,15 @@ class CardWrapper extends Component {
+ 
+ 		return (
+ 			<Wrapper className="column is-half">
+-				<Card>
++				<Card
++					onMouseEnter={this.handleMouseEnter}
++					onMouseLeave={this.handleMouseLeave}>
+ 					<Img image={item.image} />
+ 					<Content>
+ 						<Name>{item.name}</Name>
+-						<Button onClick={() => this.handleToggle()}>Donate</Button>
++						<Button>Donate</Button>
+ 					</Content>
+-					<Payments item={item} open={open} close={this.handleToggle} />
++					<Payments item={item} open={open} />
+ 				</Card>
+ 			</Wrapper>
+ 		)
+diff --git a/src/components/cards/payments.js b/src/components/cards/payments.js
+index 8b22471..f90bd42 100644
+--- a/src/components/cards/payments.js
++++ b/src/components/cards/payments.js
+@@ -61,12 +61,21 @@ const Close = styled(FontAwesomeIcon)`
+ 	font-size: 12px;
+ `
+ 
++const Warning = styled.div`
++	position: absolute;
++	bottom: 10px;
++	font-size: 14px;
++	font-weight: 500;
++	color: ${props => props.theme.primary};
++`
++
+ class Payments extends Component {
+ 	constructor(props) {
+ 		super()
+ 
+ 		this.state = {
+-			selectedAmount: 0
++			selectedAmount: 0,
++			warning: false
+ 		}
+ 
+ 		this.handleSetAmount = this.handleSetAmount.bind(this)
+@@ -78,7 +87,7 @@ class Payments extends Component {
+ 	}
+ 
+ 	handlePay(id, amount, currency) {
+-		const { updateTotalDonate, updateMessage, close } = this.props
++		const { updateTotalDonate, updateMessage } = this.props
+ 
+ 		if (amount > 0) {
+ 			fetch('http://localhost:3001/payments', {
+@@ -88,21 +97,22 @@ class Payments extends Component {
+ 			})
+ 				.then(resp => resp.json())
+ 				.then(() => {
+-					close()
+ 					updateTotalDonate(amount)
+ 					updateMessage(`+ Thanks for donate ${toCurrency(amount)}!`)
++					this.setState({ selectedAmount: 0, warning: false })
++
+ 					setTimeout(() => {
+ 						updateMessage(``)
+ 					}, 2000)
+ 				})
+ 		} else {
+-			close()
++			this.setState({ warning: true })
+ 		}
+ 	}
+ 
+ 	render() {
+-		const { theme, item, open, close } = this.props
+-		const { selectedAmount } = this.state
++		const { theme, item, open } = this.props
++		const { selectedAmount, warning } = this.state
+ 		const { payment } = config
+ 
+ 		return (
+@@ -122,9 +132,15 @@ class Payments extends Component {
+ 						this.handlePay(item.id, selectedAmount, item.currency)}>
+ 					Pay
+ 				</Button>
+-				<CloseWrapper onClick={() => close()}>
++				{/* <CloseWrapper onClick={() => close()}>
+ 					<Close icon="times" />
+-				</CloseWrapper>
++				</CloseWrapper> */}
++				{selectedAmount === 0 &&
++					warning && (
++						<Warning theme={theme}>
++							Please select your amount to donate.
++						</Warning>
++					)}
+ 			</Wrapper>
+ 		)
+ 	}
+-- 
+2.8.1.windows.1
+

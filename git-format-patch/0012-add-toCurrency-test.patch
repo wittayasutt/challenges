@@ -1,0 +1,30 @@
+From c0b7a0544d3034e75a74ae68cd4da37c8e2d7d8c Mon Sep 17 00:00:00 2001
+From: wittayasutt <wittayasutt@gmail.com>
+Date: Fri, 10 Aug 2018 04:47:31 +0700
+Subject: [PATCH 12/12] add toCurrency test
+
+---
+ src/__tests__/helpers.test.js | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/src/__tests__/helpers.test.js b/src/__tests__/helpers.test.js
+index 167376d..e78acca 100644
+--- a/src/__tests__/helpers.test.js
++++ b/src/__tests__/helpers.test.js
+@@ -1,7 +1,11 @@
+-import { summaryDonations } from '../helpers'
++import { summaryDonations, toCurrency } from '../helpers'
+ 
+ describe('helpers', function() {
+ 	test('`summaryDonations` should calculate donations correctly', function() {
+-		expect(summaryDonations([1, 2, 3, 4])).toEqual(11)
++		expect(summaryDonations([1, 2, 3, 4])).toEqual(10)
++	})
++
++	test('`toCurrency` should change number to currency', function() {
++		expect(toCurrency(1234567)).toEqual('1,234,567')
+ 	})
+ })
+-- 
+2.8.1.windows.1
+

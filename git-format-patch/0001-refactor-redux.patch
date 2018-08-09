@@ -1,0 +1,666 @@
+From 98922311271d2b6fdaaeb9f2bc32305df09b92cf Mon Sep 17 00:00:00 2001
+From: wittayasutt <wittayasutt@gmail.com>
+Date: Thu, 9 Aug 2018 00:29:11 +0700
+Subject: [PATCH 01/12] refactor redux
+
+---
+ db.json                       | 154 +++++++++++++++---------------
+ package.json                  |  70 +++++++-------
+ src/App.js                    | 212 +++++++++++++++++++++++-------------------
+ src/__tests__/helpers.test.js |  10 +-
+ src/actions/index.js          |  13 +++
+ src/helpers.js                |   3 -
+ src/helpers/index.js          |   2 +
+ src/index.js                  |  40 ++------
+ src/reducers/index.js         |  19 ++++
+ src/store.js                  |  19 ++++
+ yarn.lock                     |   8 ++
+ 11 files changed, 303 insertions(+), 247 deletions(-)
+ create mode 100644 src/actions/index.js
+ delete mode 100644 src/helpers.js
+ create mode 100644 src/helpers/index.js
+ create mode 100644 src/reducers/index.js
+ create mode 100644 src/store.js
+
+diff --git a/db.json b/db.json
+index 5531e7c..beff703 100644
+--- a/db.json
++++ b/db.json
+@@ -1,78 +1,78 @@
+ {
+-  "charities": [
+-    {
+-      "id": 1,
+-      "name": "Baan Kru Noi",
+-      "image": "baan-kru-noi.jpg",
+-      "currency": "THB"
+-    },
+-    {
+-      "id": 2,
+-      "name": "Habitat for Humanity Thailand",
+-      "image": "habitat-for-humanity-thailand.jpg",
+-      "currency": "THB"
+-    },
+-    {
+-      "id": 3,
+-      "name": "Paper Ranger",
+-      "image": "paper-ranger.jpg",
+-      "currency": "THB"
+-    },
+-    {
+-      "id": 4,
+-      "name": "Makhampom Theater",
+-      "image": "makhampom-theater.jpg",
+-      "currency": "THB"
+-    },
+-    {
+-      "id": 5,
+-      "name": "Thailand Association of the Blind",
+-      "image": "thailand-association-of-the-blind.jpg",
+-      "currency": "THB"
+-    }
+-  ],
+-  "payments": [
+-    {
+-      "charitiesId": 2,
+-      "amount": 10,
+-      "currency": "THB",
+-      "id": 1
+-    },
+-    {
+-      "charitiesId": 1,
+-      "amount": 20,
+-      "currency": "THB",
+-      "id": 2
+-    },
+-    {
+-      "charitiesId": 3,
+-      "amount": 50,
+-      "currency": "THB",
+-      "id": 3
+-    },
+-    {
+-      "charitiesId": 4,
+-      "amount": 100,
+-      "currency": "THB",
+-      "id": 4
+-    },
+-    {
+-      "charitiesId": 2,
+-      "amount": 500,
+-      "currency": "THB",
+-      "id": 5
+-    },
+-    {
+-      "charitiesId": 5,
+-      "amount": 500,
+-      "currency": "THB",
+-      "id": 6
+-    },
+-    {
+-      "id": 7
+-    },
+-    {
+-      "id": 8
+-    }
+-  ]
+-}
+\ No newline at end of file
++	"charities": [
++		{
++			"id": 1,
++			"name": "Baan Kru Noi",
++			"image": "baan-kru-noi.jpg",
++			"currency": "THB"
++		},
++		{
++			"id": 2,
++			"name": "Habitat for Humanity Thailand",
++			"image": "habitat-for-humanity-thailand.jpg",
++			"currency": "THB"
++		},
++		{
++			"id": 3,
++			"name": "Paper Ranger",
++			"image": "paper-ranger.jpg",
++			"currency": "THB"
++		},
++		{
++			"id": 4,
++			"name": "Makhampom Theater",
++			"image": "makhampom-theater.jpg",
++			"currency": "THB"
++		},
++		{
++			"id": 5,
++			"name": "Thailand Association of the Blind",
++			"image": "thailand-association-of-the-blind.jpg",
++			"currency": "THB"
++		}
++	],
++	"payments": [
++		{
++			"charitiesId": 2,
++			"amount": 10,
++			"currency": "THB",
++			"id": 1
++		},
++		{
++			"charitiesId": 1,
++			"amount": 20,
++			"currency": "THB",
++			"id": 2
++		},
++		{
++			"charitiesId": 3,
++			"amount": 50,
++			"currency": "THB",
++			"id": 3
++		},
++		{
++			"charitiesId": 4,
++			"amount": 100,
++			"currency": "THB",
++			"id": 4
++		},
++		{
++			"charitiesId": 2,
++			"amount": 500,
++			"currency": "THB",
++			"id": 5
++		},
++		{
++			"charitiesId": 5,
++			"amount": 500,
++			"currency": "THB",
++			"id": 6
++		},
++		{
++			"id": 7
++		},
++		{
++			"id": 8
++		}
++	]
++}
+diff --git a/package.json b/package.json
+index a7004dd..04d6c3d 100644
+--- a/package.json
++++ b/package.json
+@@ -1,36 +1,38 @@
+ {
+-  "name": "tamboon-react",
+-  "version": "1.0.0",
+-  "description": "Test Omise code challenge for frontend developer",
+-  "main": "src/index.js",
+-  "repository": "git@git.omise.co:ratchagarn/tamboon-react.git",
+-  "author": "Ratchagarn Naewbuntad <ratchagarn@omise.co>",
+-  "license": "MIT",
+-  "scripts": {
+-    "server": "json-server --watch db.json --port 3001",
+-    "client": "webpack-dev-server",
+-    "test": "jest"
+-  },
+-  "dependencies": {
+-    "isomorphic-fetch": "^2.2.1",
+-    "react": "^16.0.0",
+-    "react-dom": "^16.0.0",
+-    "react-redux": "^5.0.6",
+-    "redux": "^3.7.2",
+-    "styled-components": "^2.2.1"
+-  },
+-  "devDependencies": {
+-    "babel-core": "^6.26.0",
+-    "babel-eslint": "^8.0.1",
+-    "babel-loader": "^7.1.2",
+-    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+-    "babel-preset-env": "^1.6.0",
+-    "babel-preset-react": "^6.24.1",
+-    "eslint": "^4.8.0",
+-    "eslint-plugin-react": "^7.4.0",
+-    "jest": "^21.2.1",
+-    "json-server": "^0.12.0",
+-    "webpack": "^3.6.0",
+-    "webpack-dev-server": "^2.9.1"
+-  }
++	"name": "tamboon-react",
++	"version": "1.0.0",
++	"description": "Test Omise code challenge for frontend developer",
++	"main": "src/index.js",
++	"repository": "git@git.omise.co:ratchagarn/tamboon-react.git",
++	"author": "Ratchagarn Naewbuntad <ratchagarn@omise.co>",
++	"license": "MIT",
++	"scripts": {
++		"server": "json-server --watch db.json --port 3001",
++		"client": "webpack-dev-server",
++		"test": "jest"
++	},
++	"dependencies": {
++		"isomorphic-fetch": "^2.2.1",
++		"react": "^16.0.0",
++		"react-dom": "^16.0.0",
++		"react-redux": "^5.0.6",
++		"redux": "^3.7.2",
++		"redux-thunk": "^2.3.0",
++		"styled-components": "^2.2.1"
++	},
++	"devDependencies": {
++		"babel-core": "^6.26.0",
++		"babel-eslint": "^8.0.1",
++		"babel-loader": "^7.1.2",
++		"babel-plugin-syntax-dynamic-import": "^6.18.0",
++		"babel-preset-env": "^1.6.0",
++		"babel-preset-react": "^6.24.1",
++		"eslint": "^4.8.0",
++		"eslint-plugin-react": "^7.4.0",
++		"jest": "^21.2.1",
++		"json-server": "^0.12.0",
++		"redux-devtools-extension": "^2.13.5",
++		"webpack": "^3.6.0",
++		"webpack-dev-server": "^2.9.1"
++	}
+ }
+diff --git a/src/App.js b/src/App.js
+index 5a7a795..2f344e5 100644
+--- a/src/App.js
++++ b/src/App.js
+@@ -1,113 +1,129 @@
+-import React, { Component } from 'react';
+-import { connect } from 'react-redux';
+-import styled from 'styled-components';
+-import fetch from 'isomorphic-fetch';
+-
+-import { summaryDonations } from './helpers';
++import React, { Component } from 'react'
++import { connect } from 'react-redux'
++import styled from 'styled-components'
++import fetch from 'isomorphic-fetch'
+ 
++import { summaryDonations } from './helpers'
+ 
+ const Card = styled.div`
+-  margin: 10px;
+-  border: 1px solid #ccc;
+-`;
++	margin: 10px;
++	border: 1px solid #ccc;
++`
+ 
+-export default connect((state) => state)(
+-  class App extends Component {
+-    constructor(props) {
+-      super();
++export default connect(state => state)(
++	class App extends Component {
++		constructor(props) {
++			super()
+ 
+-      this.state = {
+-        charities: [],
+-        selectedAmount: 10,
+-      };
+-    }
++			this.state = {
++				charities: [],
++				selectedAmount: 10
++			}
++		}
+ 
+-    componentDidMount() {
+-      const self = this;
+-      fetch('http://localhost:3001/charities')
+-        .then(function(resp) { return resp.json(); })
+-        .then(function(data) {
+-          self.setState({ charities: data }) });
++		componentDidMount() {
++			const self = this
++			fetch('http://localhost:3001/charities')
++				.then(function(resp) {
++					return resp.json()
++				})
++				.then(function(data) {
++					self.setState({ charities: data })
++				})
+ 
+-      fetch('http://localhost:3001/payments')
+-        .then(function(resp) { return resp.json() })
+-        .then(function(data) {
+-          self.props.dispatch({
+-            type: 'UPDATE_TOTAL_DONATE',
+-            amount: summaryDonations(data.map((item) => (item.amount))),
+-          });
+-        })
+-    }
++			fetch('http://localhost:3001/payments')
++				.then(function(resp) {
++					return resp.json()
++				})
++				.then(function(data) {
++					self.props.dispatch({
++						type: 'UPDATE_TOTAL_DONATE',
++						amount: summaryDonations(data.map(item => item.amount))
++					})
++				})
++		}
+ 
+-    render() {
+-      const self = this;
+-      const cards = this.state.charities.map(function(item, i) {
+-        const payments = [10, 20, 50, 100, 500].map((amount, j) => (
+-          <label key={j}>
+-            <input
+-              type="radio"
+-              name="payment"
+-              onClick={function() {
+-                self.setState({ selectedAmount: amount })
+-              }} /> {amount}
+-          </label>
+-        ));
++		render() {
++			const self = this
++			const cards = this.state.charities.map(function(item, i) {
++				const payments = [10, 20, 50, 100, 500].map((amount, j) => (
++					<label key={j}>
++						<input
++							type="radio"
++							name="payment"
++							onClick={function() {
++								self.setState({ selectedAmount: amount })
++							}}
++						/>{' '}
++						{amount}
++					</label>
++				))
+ 
+-        return (
+-          <Card key={i}>
+-            <p>{item.name}</p>
+-            {payments}
+-            <button onClick={handlePay.call(self, item.id, self.state.selectedAmount, item.currency)}>Pay</button>
+-          </Card>
+-        );
+-      });
++				return (
++					<Card key={i}>
++						<p>{item.name}</p>
++						{payments}
++						<button
++							onClick={handlePay.call(
++								self,
++								item.id,
++								self.state.selectedAmount,
++								item.currency
++							)}>
++							Pay
++						</button>
++					</Card>
++				)
++			})
+ 
+-      const style = {
+-        color: 'red',
+-        margin: '1em 0',
+-        fontWeight: 'bold',
+-        fontSize: '16px',
+-        textAlign: 'center',
+-      };
+-      const donate = this.props.donate;
+-      const message = this.props.message;
++			const style = {
++				color: 'red',
++				margin: '1em 0',
++				fontWeight: 'bold',
++				fontSize: '16px',
++				textAlign: 'center'
++			}
++			const donate = this.props.donate
++			const message = this.props.message
+ 
+-      return (
+-        <div>
+-          <h1>Tamboon React</h1>
+-          <p>All donations: {donate}</p>
+-          <p style={style}>{message}</p>
+-          {cards}
+-        </div>
+-      );
+-    }
+-  }
+-);
++			return (
++				<div>
++					<h1>Tamboon React</h1>
++					<p>All donations: {donate}</p>
++					<p style={style}>{message}</p>
++					{cards}
++				</div>
++			)
++		}
++	}
++)
+ 
+ function handlePay(id, amount, currency) {
+-  const self = this;
+-  return function() {
+-    fetch('http://localhost:3001/payments', {
+-      method: 'POST',
+-      body: `{ "charitiesId": ${id}, "amount": ${amount}, "currency": "${currency}" }`,
+-    })
+-      .then(function(resp) { return resp.json(); })
+-      .then(function() {
+-        self.props.dispatch({
+-          type: 'UPDATE_TOTAL_DONATE',
+-          amount,
+-        });
+-        self.props.dispatch({
+-          type: 'UPDATE_MESSAGE',
+-          message: `Thanks for donate ${amount}!`,
+-        });
++	const self = this
++	return function() {
++		fetch('http://localhost:3001/payments', {
++			method: 'POST',
++			body: `{ "charitiesId": ${id}, "amount": ${amount}, "currency": "${currency}" }`
++		})
++			.then(function(resp) {
++				return resp.json()
++			})
++			.then(function() {
++				self.props.dispatch({
++					type: 'UPDATE_TOTAL_DONATE',
++					amount
++				})
++				self.props.dispatch({
++					type: 'UPDATE_MESSAGE',
++					message: `Thanks for donate ${amount}!`
++				})
+ 
+-        setTimeout(function() {
+-          self.props.dispatch({
+-            type: 'UPDATE_MESSAGE',
+-            message: '',
+-          });
+-        }, 2000);
+-      });
+-  }
++				setTimeout(function() {
++					self.props.dispatch({
++						type: 'UPDATE_MESSAGE',
++						message: ''
++					})
++				}, 2000)
++			})
++	}
+ }
+diff --git a/src/__tests__/helpers.test.js b/src/__tests__/helpers.test.js
+index 4a8166a..167376d 100644
+--- a/src/__tests__/helpers.test.js
++++ b/src/__tests__/helpers.test.js
+@@ -1,7 +1,7 @@
+-import { summaryDonations } from '../helpers';
++import { summaryDonations } from '../helpers'
+ 
+ describe('helpers', function() {
+-  test('`summaryDonations` should calculate donations correctly', function() {
+-    expect(summaryDonations([1, 2, 3, 4])).toEqual(11);
+-  });
+-});
++	test('`summaryDonations` should calculate donations correctly', function() {
++		expect(summaryDonations([1, 2, 3, 4])).toEqual(11)
++	})
++})
+diff --git a/src/actions/index.js b/src/actions/index.js
+new file mode 100644
+index 0000000..db71146
+--- /dev/null
++++ b/src/actions/index.js
+@@ -0,0 +1,13 @@
++export const updateTotalDonate = amount => dispatch => {
++	return dispatch({
++		type: 'UPDATE_TOTAL_DONATE',
++		amount
++	})
++}
++
++export const updateMessage = message => dispatch => {
++	return dispatch({
++		type: 'UPDATE_MESSAGE',
++		message
++	})
++}
+diff --git a/src/helpers.js b/src/helpers.js
+deleted file mode 100644
+index ae7e01b..0000000
+--- a/src/helpers.js
++++ /dev/null
+@@ -1,3 +0,0 @@
+-export const summaryDonations = (danations) => (
+-  danations.reduce((accumulator, value) => (accumulator + value))
+-);
+diff --git a/src/helpers/index.js b/src/helpers/index.js
+new file mode 100644
+index 0000000..632afb1
+--- /dev/null
++++ b/src/helpers/index.js
+@@ -0,0 +1,2 @@
++export const summaryDonations = danations =>
++	danations.reduce((accumulator, value) => accumulator + value)
+diff --git a/src/index.js b/src/index.js
+index a25e224..27e2d31 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -1,32 +1,12 @@
+-import React from 'react';
+-import { render } from 'react-dom';
+-import { createStore } from 'redux';
+-import { Provider } from 'react-redux';
+-import App from './App';
+-
+-const store = createStore(function(state, action) {
+-  const _state = state == null ? {
+-    donate: 0,
+-    message: '',
+-  } : state;
+-
+-  switch (action.type) {
+-    case 'UPDATE_TOTAL_DONATE':
+-      return Object.assign({}, _state, {
+-        donate: _state.donate + action.amount,
+-      });
+-    case 'UPDATE_MESSAGE':
+-      return Object.assign({}, _state, {
+-        message: action.message,
+-      });
+-
+-    default: return _state;
+-  }
+-});
++import React from 'react'
++import { render } from 'react-dom'
++import { Provider } from 'react-redux'
++import store from './store'
++import App from './App'
+ 
+ render(
+-  <Provider store={store}>
+-    <App />
+-  </Provider>,
+-  document.getElementById('root')
+-);
++	<Provider store={store}>
++		<App />
++	</Provider>,
++	document.getElementById('root')
++)
+diff --git a/src/reducers/index.js b/src/reducers/index.js
+new file mode 100644
+index 0000000..ac3d256
+--- /dev/null
++++ b/src/reducers/index.js
+@@ -0,0 +1,19 @@
++export const donateReducer = (state = 120, action) => {
++	switch (action.type) {
++		case 'UPDATE_TOTAL_DONATE': {
++			return state + action.donate
++		}
++		default:
++			return state
++	}
++}
++
++export const messageReducer = (state = '', action) => {
++	switch (action.type) {
++		case 'UPDATE_MESSAGE': {
++			return action.message
++		}
++		default:
++			return state
++	}
++}
+diff --git a/src/store.js b/src/store.js
+new file mode 100644
+index 0000000..6f49518
+--- /dev/null
++++ b/src/store.js
+@@ -0,0 +1,19 @@
++import { createStore, combineReducers, applyMiddleware } from 'redux'
++import { composeWithDevTools } from 'redux-devtools-extension'
++import thunkMiddleware from 'redux-thunk'
++import { donateReducer, messageReducer } from './reducers'
++
++const reducer = combineReducers({
++	donate: donateReducer,
++	message: messageReducer
++})
++
++const initialState = {}
++
++const store = createStore(
++	reducer,
++	initialState,
++	composeWithDevTools(applyMiddleware(thunkMiddleware))
++)
++
++export default store
+diff --git a/yarn.lock b/yarn.lock
+index 45c8069..e04f160 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -4307,6 +4307,14 @@ redent@^1.0.0:
+     indent-string "^2.1.0"
+     strip-indent "^1.0.1"
+ 
++redux-devtools-extension@^2.13.5:
++  version "2.13.5"
++  resolved "https://registry.yarnpkg.com/redux-devtools-extension/-/redux-devtools-extension-2.13.5.tgz#3ff34f7227acfeef3964194f5f7fc2765e5c5a39"
++
++redux-thunk@^2.3.0:
++  version "2.3.0"
++  resolved "https://registry.yarnpkg.com/redux-thunk/-/redux-thunk-2.3.0.tgz#51c2c19a185ed5187aaa9a2d08b666d0d6467622"
++
+ redux@^3.7.2:
+   version "3.7.2"
+   resolved "https://registry.yarnpkg.com/redux/-/redux-3.7.2.tgz#06b73123215901d25d065be342eb026bc1c8537b"
+-- 
+2.8.1.windows.1
+

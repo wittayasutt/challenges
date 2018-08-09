@@ -1,0 +1,667 @@
+From bb1594fde4d0bf5ed6f9cad1b2fd0493e6eb9b50 Mon Sep 17 00:00:00 2001
+From: wittayasutt <wittayasutt@gmail.com>
+Date: Thu, 9 Aug 2018 01:17:50 +0700
+Subject: [PATCH 02/12] add bulma / fix webpack (add style and css loader) /
+ refactor title
+
+---
+ package.json                  |   3 +
+ src/App.js                    | 142 ++++++++++++++++-------------------
+ src/components/Title/index.js |  18 +++++
+ src/index.js                  |   2 +
+ src/reducers/index.js         |   4 +-
+ webpack.config.js             |  62 ++++++++-------
+ yarn.lock                     | 171 ++++++++++++++++++++++++++++++++++++++++++
+ 7 files changed, 295 insertions(+), 107 deletions(-)
+ create mode 100644 src/components/Title/index.js
+
+diff --git a/package.json b/package.json
+index 04d6c3d..f56ba18 100644
+--- a/package.json
++++ b/package.json
+@@ -12,6 +12,7 @@
+ 		"test": "jest"
+ 	},
+ 	"dependencies": {
++		"bulma": "^0.7.1",
+ 		"isomorphic-fetch": "^2.2.1",
+ 		"react": "^16.0.0",
+ 		"react-dom": "^16.0.0",
+@@ -27,11 +28,13 @@
+ 		"babel-plugin-syntax-dynamic-import": "^6.18.0",
+ 		"babel-preset-env": "^1.6.0",
+ 		"babel-preset-react": "^6.24.1",
++		"css-loader": "^1.0.0",
+ 		"eslint": "^4.8.0",
+ 		"eslint-plugin-react": "^7.4.0",
+ 		"jest": "^21.2.1",
+ 		"json-server": "^0.12.0",
+ 		"redux-devtools-extension": "^2.13.5",
++		"style-loader": "^0.22.1",
+ 		"webpack": "^3.6.0",
+ 		"webpack-dev-server": "^2.9.1"
+ 	}
+diff --git a/src/App.js b/src/App.js
+index 2f344e5..8b8bf6b 100644
+--- a/src/App.js
++++ b/src/App.js
+@@ -5,98 +5,88 @@ import fetch from 'isomorphic-fetch'
+ 
+ import { summaryDonations } from './helpers'
+ 
++import Title from './components/title'
++
+ const Card = styled.div`
+ 	margin: 10px;
+ 	border: 1px solid #ccc;
+ `
+ 
+-export default connect(state => state)(
+-	class App extends Component {
+-		constructor(props) {
+-			super()
++class App extends Component {
++	constructor(props) {
++		super()
+ 
+-			this.state = {
+-				charities: [],
+-				selectedAmount: 10
+-			}
++		this.state = {
++			charities: [],
++			selectedAmount: 10
+ 		}
++	}
+ 
+-		componentDidMount() {
+-			const self = this
+-			fetch('http://localhost:3001/charities')
+-				.then(function(resp) {
+-					return resp.json()
+-				})
+-				.then(function(data) {
+-					self.setState({ charities: data })
+-				})
++	componentDidMount() {
++		const self = this
++		fetch('http://localhost:3001/charities')
++			.then(function(resp) {
++				return resp.json()
++			})
++			.then(function(data) {
++				self.setState({ charities: data })
++			})
+ 
+-			fetch('http://localhost:3001/payments')
+-				.then(function(resp) {
+-					return resp.json()
+-				})
+-				.then(function(data) {
+-					self.props.dispatch({
+-						type: 'UPDATE_TOTAL_DONATE',
+-						amount: summaryDonations(data.map(item => item.amount))
+-					})
++		fetch('http://localhost:3001/payments')
++			.then(function(resp) {
++				return resp.json()
++			})
++			.then(function(data) {
++				self.props.dispatch({
++					type: 'UPDATE_TOTAL_DONATE',
++					amount: summaryDonations(data.map(item => item.amount))
+ 				})
+-		}
+-
+-		render() {
+-			const self = this
+-			const cards = this.state.charities.map(function(item, i) {
+-				const payments = [10, 20, 50, 100, 500].map((amount, j) => (
+-					<label key={j}>
+-						<input
+-							type="radio"
+-							name="payment"
+-							onClick={function() {
+-								self.setState({ selectedAmount: amount })
+-							}}
+-						/>{' '}
+-						{amount}
+-					</label>
+-				))
+-
+-				return (
+-					<Card key={i}>
+-						<p>{item.name}</p>
+-						{payments}
+-						<button
+-							onClick={handlePay.call(
+-								self,
+-								item.id,
+-								self.state.selectedAmount,
+-								item.currency
+-							)}>
+-							Pay
+-						</button>
+-					</Card>
+-				)
+ 			})
++	}
+ 
+-			const style = {
+-				color: 'red',
+-				margin: '1em 0',
+-				fontWeight: 'bold',
+-				fontSize: '16px',
+-				textAlign: 'center'
+-			}
+-			const donate = this.props.donate
+-			const message = this.props.message
++	render() {
++		const self = this
++		const cards = this.state.charities.map(function(item, i) {
++			const payments = [10, 20, 50, 100, 500].map((amount, j) => (
++				<label key={j}>
++					<input
++						type="radio"
++						name="payment"
++						onClick={function() {
++							self.setState({ selectedAmount: amount })
++						}}
++					/>{' '}
++					{amount}
++				</label>
++			))
+ 
+ 			return (
+-				<div>
+-					<h1>Tamboon React</h1>
+-					<p>All donations: {donate}</p>
+-					<p style={style}>{message}</p>
+-					{cards}
+-				</div>
++				<Card key={i}>
++					<p>{item.name}</p>
++					{payments}
++					<button
++						onClick={handlePay.call(
++							self,
++							item.id,
++							self.state.selectedAmount,
++							item.currency
++						)}>
++						Pay
++					</button>
++				</Card>
+ 			)
+-		}
++		})
++
++		return (
++			<div className="container">
++				<Title />
++				{cards}
++			</div>
++		)
+ 	}
+-)
++}
++
++export default App
+ 
+ function handlePay(id, amount, currency) {
+ 	const self = this
+diff --git a/src/components/Title/index.js b/src/components/Title/index.js
+new file mode 100644
+index 0000000..bf696de
+--- /dev/null
++++ b/src/components/Title/index.js
+@@ -0,0 +1,18 @@
++import React, { Component } from 'react'
++import { connect } from 'react-redux'
++
++class Title extends Component {
++	render() {
++		const { donate, message } = this.props
++
++		return (
++			<div>
++				<h1>Tamboon React</h1>
++				<p>All donations: {donate}</p>
++				<p>{message}</p>
++			</div>
++		)
++	}
++}
++
++export default connect(state => state)(Title)
+diff --git a/src/index.js b/src/index.js
+index 27e2d31..5274ac6 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -4,6 +4,8 @@ import { Provider } from 'react-redux'
+ import store from './store'
+ import App from './App'
+ 
++import 'bulma/css/bulma.min.css'
++
+ render(
+ 	<Provider store={store}>
+ 		<App />
+diff --git a/src/reducers/index.js b/src/reducers/index.js
+index ac3d256..54cd4a4 100644
+--- a/src/reducers/index.js
++++ b/src/reducers/index.js
+@@ -1,4 +1,4 @@
+-export const donateReducer = (state = 120, action) => {
++export const donateReducer = (state = 0, action) => {
+ 	switch (action.type) {
+ 		case 'UPDATE_TOTAL_DONATE': {
+ 			return state + action.donate
+@@ -8,7 +8,7 @@ export const donateReducer = (state = 120, action) => {
+ 	}
+ }
+ 
+-export const messageReducer = (state = '', action) => {
++export const messageReducer = (state = '1sdsd', action) => {
+ 	switch (action.type) {
+ 		case 'UPDATE_MESSAGE': {
+ 			return action.message
+diff --git a/webpack.config.js b/webpack.config.js
+index 000624e..ac416a4 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -1,35 +1,39 @@
+-const path = require('path');
++const path = require('path')
+ 
+ const config = {
+-  entry: './src/index.js',
+-  output: {
+-    filename: '[name].js',
+-    path: path.resolve(__dirname, 'build'),
+-    publicPath: 'build',
+-  },
++	entry: './src/index.js',
++	output: {
++		filename: '[name].js',
++		path: path.resolve(__dirname, 'build'),
++		publicPath: 'build'
++	},
+ 
+-  devtool: 'inline-source-map',
++	devtool: 'inline-source-map',
+ 
+-  devServer: {
+-    inline: true,
+-    host: '0.0.0.0',
+-    port: 3000,
+-    historyApiFallback: true,
+-    disableHostCheck: true,
+-    contentBase: 'public',
+-  },
++	devServer: {
++		inline: true,
++		host: '0.0.0.0',
++		port: 3000,
++		historyApiFallback: true,
++		disableHostCheck: true,
++		contentBase: 'public'
++	},
+ 
+-  module: {
+-    rules: [
+-      {
+-        test: /\.js$/,
+-        exclude: [/node_modules/],
+-        use: {
+-          loader: 'babel-loader',
+-        },
+-      },
+-    ],
+-  },
+-};
++	module: {
++		rules: [
++			{
++				test: /\.js$/,
++				exclude: [/node_modules/],
++				use: {
++					loader: 'babel-loader'
++				}
++			},
++			{
++				test: /\.css$/,
++				use: ['style-loader', 'css-loader']
++			}
++		]
++	}
++}
+ 
+-module.exports = config;
++module.exports = config
+diff --git a/yarn.lock b/yarn.lock
+index e04f160..bb1b1e4 100644
+--- a/yarn.lock
++++ b/yarn.lock
+@@ -51,6 +51,10 @@ ajv-keywords@^2.0.0, ajv-keywords@^2.1.0:
+   version "2.1.0"
+   resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-2.1.0.tgz#a296e17f7bfae7c1ce4f7e0de53d29cb32162df0"
+ 
++ajv-keywords@^3.1.0:
++  version "3.2.0"
++  resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-3.2.0.tgz#e86b819c602cf8821ad637413698f1dec021847a"
++
+ ajv@^4.9.1:
+   version "4.11.8"
+   resolved "https://registry.yarnpkg.com/ajv/-/ajv-4.11.8.tgz#82ffb02b29e662ae53bdc20af15947706739c536"
+@@ -67,6 +71,15 @@ ajv@^5.1.0, ajv@^5.1.5, ajv@^5.2.0, ajv@^5.2.3:
+     json-schema-traverse "^0.3.0"
+     json-stable-stringify "^1.0.1"
+ 
++ajv@^6.1.0:
++  version "6.5.2"
++  resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.5.2.tgz#678495f9b82f7cca6be248dd92f59bff5e1f4360"
++  dependencies:
++    fast-deep-equal "^2.0.1"
++    fast-json-stable-stringify "^2.0.0"
++    json-schema-traverse "^0.4.1"
++    uri-js "^4.2.1"
++
+ align-text@^0.1.1, align-text@^0.1.3:
+   version "0.1.4"
+   resolved "https://registry.yarnpkg.com/align-text/-/align-text-0.1.4.tgz#0cd90a561093f35d0a99256c22b7069433fad117"
+@@ -111,6 +124,12 @@ ansi-styles@^3.1.0, ansi-styles@^3.2.0:
+   dependencies:
+     color-convert "^1.9.0"
+ 
++ansi-styles@^3.2.1:
++  version "3.2.1"
++  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.1.tgz#41fbb20243e50b12be0f04b8dedbf07520ce841d"
++  dependencies:
++    color-convert "^1.9.0"
++
+ anymatch@^1.3.0:
+   version "1.3.2"
+   resolved "https://registry.yarnpkg.com/anymatch/-/anymatch-1.3.2.tgz#553dcb8f91e3c889845dfdba34c77721b90b9d7a"
+@@ -1116,6 +1135,10 @@ builtin-status-codes@^3.0.0:
+   version "3.0.0"
+   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
+ 
++bulma@^0.7.1:
++  version "0.7.1"
++  resolved "https://registry.yarnpkg.com/bulma/-/bulma-0.7.1.tgz#73c2e3b2930c90cc272029cbd19918b493fca486"
++
+ bytes@3.0.0:
+   version "3.0.0"
+   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.0.0.tgz#d32815404d689699f85a4ea4fa8755dd13a96048"
+@@ -1194,6 +1217,14 @@ chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0:
+     escape-string-regexp "^1.0.5"
+     supports-color "^4.0.0"
+ 
++chalk@^2.4.1:
++  version "2.4.1"
++  resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.1.tgz#18c49ab16a037b6eb0152cc83e3471338215b66e"
++  dependencies:
++    ansi-styles "^3.2.1"
++    escape-string-regexp "^1.0.5"
++    supports-color "^5.3.0"
++
+ chokidar@^1.6.0, chokidar@^1.7.0:
+   version "1.7.0"
+   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-1.7.0.tgz#798e689778151c8076b4b360e5edd28cda2bb468"
+@@ -1463,6 +1494,31 @@ css-color-keywords@^1.0.0:
+   version "1.0.0"
+   resolved "https://registry.yarnpkg.com/css-color-keywords/-/css-color-keywords-1.0.0.tgz#fea2616dc676b2962686b3af8dbdbe180b244e05"
+ 
++css-loader@^1.0.0:
++  version "1.0.0"
++  resolved "https://registry.yarnpkg.com/css-loader/-/css-loader-1.0.0.tgz#9f46aaa5ca41dbe31860e3b62b8e23c42916bf56"
++  dependencies:
++    babel-code-frame "^6.26.0"
++    css-selector-tokenizer "^0.7.0"
++    icss-utils "^2.1.0"
++    loader-utils "^1.0.2"
++    lodash.camelcase "^4.3.0"
++    postcss "^6.0.23"
++    postcss-modules-extract-imports "^1.2.0"
++    postcss-modules-local-by-default "^1.2.0"
++    postcss-modules-scope "^1.1.0"
++    postcss-modules-values "^1.3.0"
++    postcss-value-parser "^3.3.0"
++    source-list-map "^2.0.0"
++
++css-selector-tokenizer@^0.7.0:
++  version "0.7.0"
++  resolved "https://registry.yarnpkg.com/css-selector-tokenizer/-/css-selector-tokenizer-0.7.0.tgz#e6988474ae8c953477bf5e7efecfceccd9cf4c86"
++  dependencies:
++    cssesc "^0.1.0"
++    fastparse "^1.1.1"
++    regexpu-core "^1.0.0"
++
+ css-to-react-native@^2.0.3:
+   version "2.0.4"
+   resolved "https://registry.yarnpkg.com/css-to-react-native/-/css-to-react-native-2.0.4.tgz#cf4cc407558b3474d4ba8be1a2cd3b6ce713101b"
+@@ -1471,6 +1527,10 @@ css-to-react-native@^2.0.3:
+     fbjs "^0.8.5"
+     postcss-value-parser "^3.3.0"
+ 
++cssesc@^0.1.0:
++  version "0.1.0"
++  resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-0.1.0.tgz#c814903e45623371a0477b40109aaafbeeaddbb4"
++
+ cssom@0.3.x, "cssom@>= 0.3.2 < 0.4.0":
+   version "0.3.2"
+   resolved "https://registry.yarnpkg.com/cssom/-/cssom-0.3.2.tgz#b8036170c79f07a90ff2f16e22284027a243848b"
+@@ -2088,10 +2148,22 @@ fast-deep-equal@^1.0.0:
+   version "1.0.0"
+   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-1.0.0.tgz#96256a3bc975595eb36d82e9929d060d893439ff"
+ 
++fast-deep-equal@^2.0.1:
++  version "2.0.1"
++  resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz#7b05218ddf9667bf7f370bf7fdb2cb15fdd0aa49"
++
++fast-json-stable-stringify@^2.0.0:
++  version "2.0.0"
++  resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz#d5142c0caee6b1189f87d3a76111064f86c8bbf2"
++
+ fast-levenshtein@~2.0.4:
+   version "2.0.6"
+   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
+ 
++fastparse@^1.1.1:
++  version "1.1.1"
++  resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.1.tgz#d1e2643b38a94d7583b479060e6c4affc94071f8"
++
+ faye-websocket@^0.10.0:
+   version "0.10.0"
+   resolved "https://registry.yarnpkg.com/faye-websocket/-/faye-websocket-0.10.0.tgz#4e492f8d04dfb6f89003507f6edbf2d501e7c6f4"
+@@ -2442,6 +2514,10 @@ has-flag@^2.0.0:
+   version "2.0.0"
+   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-2.0.0.tgz#e8207af1cc7b30d446cc70b734b5e8be18f88d51"
+ 
++has-flag@^3.0.0:
++  version "3.0.0"
++  resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-3.0.0.tgz#b5d454dc2199ae225699f3467e5a07f3b955bafd"
++
+ has-unicode@^2.0.0:
+   version "2.0.1"
+   resolved "https://registry.yarnpkg.com/has-unicode/-/has-unicode-2.0.1.tgz#e0e6fe6a28cf51138855e086d1691e771de2a8b9"
+@@ -2605,6 +2681,16 @@ iconv-lite@0.4.19, iconv-lite@^0.4.17, iconv-lite@~0.4.13:
+   version "0.4.19"
+   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.19.tgz#f7468f60135f5e5dad3399c0a81be9a1603a082b"
+ 
++icss-replace-symbols@^1.1.0:
++  version "1.1.0"
++  resolved "https://registry.yarnpkg.com/icss-replace-symbols/-/icss-replace-symbols-1.1.0.tgz#06ea6f83679a7749e386cfe1fe812ae5db223ded"
++
++icss-utils@^2.1.0:
++  version "2.1.0"
++  resolved "https://registry.yarnpkg.com/icss-utils/-/icss-utils-2.1.0.tgz#83f0a0ec378bf3246178b6c2ad9136f135b1c962"
++  dependencies:
++    postcss "^6.0.1"
++
+ ieee754@^1.1.4:
+   version "1.1.8"
+   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.1.8.tgz#be33d40ac10ef1926701f6f08a2d86fbfd1ad3e4"
+@@ -3265,6 +3351,10 @@ json-schema-traverse@^0.3.0:
+   version "0.3.1"
+   resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.3.1.tgz#349a6d44c53a51de89b40805c5d5e59b417d3340"
+ 
++json-schema-traverse@^0.4.1:
++  version "0.4.1"
++  resolved "https://registry.yarnpkg.com/json-schema-traverse/-/json-schema-traverse-0.4.1.tgz#69f6a87d9513ab8bb8fe63bdb0979c448e684660"
++
+ json-schema@0.2.3:
+   version "0.2.3"
+   resolved "https://registry.yarnpkg.com/json-schema/-/json-schema-0.2.3.tgz#b480c892e59a2f05954ce727bd3f2a4e882f9e13"
+@@ -3422,6 +3512,10 @@ lodash-id@^0.13.0:
+   version "0.13.0"
+   resolved "https://registry.yarnpkg.com/lodash-id/-/lodash-id-0.13.0.tgz#1b2086c24f004f07411bdb09b775072114bcddc6"
+ 
++lodash.camelcase@^4.3.0:
++  version "4.3.0"
++  resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
++
+ lodash@4, lodash@^4.11.2, lodash@^4.14.0, lodash@^4.17.2, lodash@^4.17.4, lodash@^4.2.0, lodash@^4.2.1, lodash@^4.3.0:
+   version "4.17.4"
+   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
+@@ -4068,10 +4162,45 @@ portfinder@^1.0.9:
+     debug "^2.2.0"
+     mkdirp "0.5.x"
+ 
++postcss-modules-extract-imports@^1.2.0:
++  version "1.2.0"
++  resolved "https://registry.yarnpkg.com/postcss-modules-extract-imports/-/postcss-modules-extract-imports-1.2.0.tgz#66140ecece38ef06bf0d3e355d69bf59d141ea85"
++  dependencies:
++    postcss "^6.0.1"
++
++postcss-modules-local-by-default@^1.2.0:
++  version "1.2.0"
++  resolved "https://registry.yarnpkg.com/postcss-modules-local-by-default/-/postcss-modules-local-by-default-1.2.0.tgz#f7d80c398c5a393fa7964466bd19500a7d61c069"
++  dependencies:
++    css-selector-tokenizer "^0.7.0"
++    postcss "^6.0.1"
++
++postcss-modules-scope@^1.1.0:
++  version "1.1.0"
++  resolved "https://registry.yarnpkg.com/postcss-modules-scope/-/postcss-modules-scope-1.1.0.tgz#d6ea64994c79f97b62a72b426fbe6056a194bb90"
++  dependencies:
++    css-selector-tokenizer "^0.7.0"
++    postcss "^6.0.1"
++
++postcss-modules-values@^1.3.0:
++  version "1.3.0"
++  resolved "https://registry.yarnpkg.com/postcss-modules-values/-/postcss-modules-values-1.3.0.tgz#ecffa9d7e192518389f42ad0e83f72aec456ea20"
++  dependencies:
++    icss-replace-symbols "^1.1.0"
++    postcss "^6.0.1"
++
+ postcss-value-parser@^3.3.0:
+   version "3.3.0"
+   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-3.3.0.tgz#87f38f9f18f774a4ab4c8a232f5c5ce8872a9d15"
+ 
++postcss@^6.0.1, postcss@^6.0.23:
++  version "6.0.23"
++  resolved "https://registry.yarnpkg.com/postcss/-/postcss-6.0.23.tgz#61c82cc328ac60e677645f979054eb98bc0e3324"
++  dependencies:
++    chalk "^2.4.1"
++    source-map "^0.6.1"
++    supports-color "^5.4.0"
++
+ prelude-ls@~1.1.2:
+   version "1.1.2"
+   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
+@@ -4154,6 +4283,10 @@ punycode@^1.2.4, punycode@^1.4.1:
+   version "1.4.1"
+   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
+ 
++punycode@^2.1.0:
++  version "2.1.1"
++  resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
++
+ qs@6.5.1, qs@~6.5.1:
+   version "6.5.1"
+   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.1.tgz#349cdf6eef89ec45c12d7d5eb3fc0c870343a6d8"
+@@ -4346,6 +4479,14 @@ regex-cache@^0.4.2:
+   dependencies:
+     is-equal-shallow "^0.1.3"
+ 
++regexpu-core@^1.0.0:
++  version "1.0.0"
++  resolved "https://registry.yarnpkg.com/regexpu-core/-/regexpu-core-1.0.0.tgz#86a763f58ee4d7c2f6b102e4764050de7ed90c6b"
++  dependencies:
++    regenerate "^1.2.1"
++    regjsgen "^0.2.0"
++    regjsparser "^0.1.4"
++
+ regexpu-core@^2.0.0:
+   version "2.0.0"
+   resolved "https://registry.yarnpkg.com/regexpu-core/-/regexpu-core-2.0.0.tgz#49d038837b8dcf8bfa5b9a42139938e6ea2ae240"
+@@ -4540,6 +4681,13 @@ sax@^1.2.1:
+   version "1.2.4"
+   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
+ 
++schema-utils@^0.4.5:
++  version "0.4.7"
++  resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-0.4.7.tgz#ba74f597d2be2ea880131746ee17d0a093c68187"
++  dependencies:
++    ajv "^6.1.0"
++    ajv-keywords "^3.1.0"
++
+ select-hose@^2.0.0:
+   version "2.0.0"
+   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
+@@ -4716,6 +4864,10 @@ source-map@^0.5.3, source-map@^0.5.6, source-map@~0.5.1, source-map@~0.5.3, sour
+   version "0.5.7"
+   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
+ 
++source-map@^0.6.1:
++  version "0.6.1"
++  resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
++
+ spdx-correct@~1.0.0:
+   version "1.0.2"
+   resolved "https://registry.yarnpkg.com/spdx-correct/-/spdx-correct-1.0.2.tgz#4b3073d933ff51f3912f03ac5519498a4150db40"
+@@ -4870,6 +5022,13 @@ strip-json-comments@~2.0.1:
+   version "2.0.1"
+   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
+ 
++style-loader@^0.22.1:
++  version "0.22.1"
++  resolved "https://registry.yarnpkg.com/style-loader/-/style-loader-0.22.1.tgz#901ea28aac78fcc00c5075585ac07d7ef3f87a52"
++  dependencies:
++    loader-utils "^1.1.0"
++    schema-utils "^0.4.5"
++
+ styled-components@^2.2.1:
+   version "2.2.1"
+   resolved "https://registry.yarnpkg.com/styled-components/-/styled-components-2.2.1.tgz#f4835f1001c37bcc301ac3865b5d93466de4dd5b"
+@@ -4904,6 +5063,12 @@ supports-color@^4.0.0, supports-color@^4.2.1:
+   dependencies:
+     has-flag "^2.0.0"
+ 
++supports-color@^5.3.0, supports-color@^5.4.0:
++  version "5.4.0"
++  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.4.0.tgz#1c6b337402c2137605efe19f10fec390f6faab54"
++  dependencies:
++    has-flag "^3.0.0"
++
+ symbol-observable@^1.0.3:
+   version "1.0.4"
+   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.4.tgz#29bf615d4aa7121bdd898b22d4b3f9bc4e2aa03d"
+@@ -5113,6 +5278,12 @@ update-notifier@^1.0.2:
+     semver-diff "^2.0.0"
+     xdg-basedir "^2.0.0"
+ 
++uri-js@^4.2.1:
++  version "4.2.2"
++  resolved "https://registry.yarnpkg.com/uri-js/-/uri-js-4.2.2.tgz#94c540e1ff772956e2299507c010aea6c8838eb0"
++  dependencies:
++    punycode "^2.1.0"
++
+ url-parse-lax@^1.0.0:
+   version "1.0.0"
+   resolved "https://registry.yarnpkg.com/url-parse-lax/-/url-parse-lax-1.0.0.tgz#7af8f303645e9bd79a272e7a14ac68bc0609da73"
+-- 
+2.8.1.windows.1
+

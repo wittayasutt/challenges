@@ -1,0 +1,153 @@
+From 36a0e4726f04613e6b350ff3765c8b31289453e1 Mon Sep 17 00:00:00 2001
+From: wittayasutt <wittayasutt@gmail.com>
+Date: Fri, 10 Aug 2018 03:49:25 +0700
+Subject: [PATCH 09/12] navbar for watch donations
+
+---
+ src/App.js                    |  7 +++---
+ src/components/Title/index.js | 57 ++++++++++++++++++++++++++++++++++---------
+ src/components/cards/index.js | 12 ++++++---
+ 3 files changed, 57 insertions(+), 19 deletions(-)
+
+diff --git a/src/App.js b/src/App.js
+index 4369e61..5d8a6ff 100644
+--- a/src/App.js
++++ b/src/App.js
+@@ -11,20 +11,19 @@ library.add(faTimes)
+ import Title from './components/title'
+ import Cards from './components/cards'
+ 
+-const Container = styled.div``
++const Wrapper = styled.div``
+ 
+ class App extends Component {
+ 	render() {
+ 		return (
+ 			<ThemeProvider theme={theme}>
+-				<Container className="container">
++				<Wrapper>
+ 					<Title />
+ 					<Cards />
+-				</Container>
++				</Wrapper>
+ 			</ThemeProvider>
+ 		)
+ 	}
+ }
+ 
+ export default App
+-
+diff --git a/src/components/Title/index.js b/src/components/Title/index.js
+index 27158a0..e5bb60d 100644
+--- a/src/components/Title/index.js
++++ b/src/components/Title/index.js
+@@ -4,10 +4,21 @@ import { connect } from 'react-redux'
+ import { toCurrency } from '../../helpers'
+ 
+ const Wrapper = styled.div`
+-	min-height: 80px;
++	height: 120px;
++	width: 100%;
++	position: fixed;
++	top: 0;
++	background: #ffffff;
++	transition: 0.4s;
++	z-index: 1;
++	border-bottom: 1px solid
++		${props => (props.top ? '#FFFFFF' : props.theme.primary)};
++`
++
++const Container = styled.div`
+ 	display: flex;
+ 	justify-content: space-between;
+-	margin: 1.5rem 0 1rem;
++	margin: 1.5rem auto 1rem !important;
+ 
+ 	@media screen and (max-width: 1087px) {
+ 		padding: 0 0.75rem;
+@@ -75,20 +86,42 @@ const Message = styled.p`
+ `
+ 
+ class Title extends Component {
++	constructor(props) {
++		super()
++
++		this.state = {
++			top: true
++		}
++
++		this.handleScroll = this.handleScroll.bind(this)
++	}
++
++	componentDidMount() {
++		window.addEventListener('scroll', this.handleScroll)
++	}
++
++	handleScroll(event) {
++		const top = window.scrollY > 0 ? false : true
++		this.setState({ top })
++	}
++
+ 	render() {
+ 		const { theme, donate, message } = this.props
++		const { top } = this.state
+ 
+ 		return (
+-			<Wrapper>
+-				<Name theme={theme}>
+-					<span className="omise">Omise</span> Tamboon React
+-				</Name>
+-				<Donations>
+-					<Amount theme={theme}>
+-						All donations: <div className="amount">{toCurrency(donate)}</div>
+-					</Amount>
+-					<Message theme={theme}>{message}</Message>
+-				</Donations>
++			<Wrapper theme={theme} top={top}>
++				<Container className="container">
++					<Name theme={theme}>
++						<span className="omise">Omise</span> Tamboon React
++					</Name>
++					<Donations>
++						<Amount theme={theme}>
++							All donations: <div className="amount">{toCurrency(donate)}</div>
++						</Amount>
++						<Message theme={theme}>{message}</Message>
++					</Donations>
++				</Container>
+ 			</Wrapper>
+ 		)
+ 	}
+diff --git a/src/components/cards/index.js b/src/components/cards/index.js
+index 831194b..68c7b45 100644
+--- a/src/components/cards/index.js
++++ b/src/components/cards/index.js
+@@ -9,6 +9,10 @@ import { summaryDonations } from '../../helpers'
+ 
+ import Card from './card'
+ 
++const Container = styled.div`
++	margin: 120px auto 0 !important;
++`
++
+ const Columns = styled.div`
+ 	@media screen and (max-width: 1087px) {
+ 		margin: 0 !important;
+@@ -48,9 +52,11 @@ class Cards extends Component {
+ 		const { charities } = this.state
+ 
+ 		return (
+-			<Columns className="columns">
+-				{charities.map((item, index) => <Card key={index} item={item} />)}
+-			</Columns>
++			<Container className="container">
++				<Columns className="columns">
++					{charities.map((item, index) => <Card key={index} item={item} />)}
++				</Columns>
++			</Container>
+ 		)
+ 	}
+ }
+-- 
+2.8.1.windows.1
+
