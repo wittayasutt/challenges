@@ -4,10 +4,21 @@ import { connect } from 'react-redux'
 import { toCurrency } from '../../helpers'
 
 const Wrapper = styled.div`
-	min-height: 80px;
+	height: 120px;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	background: #ffffff;
+	transition: 0.4s;
+	z-index: 1;
+	border-bottom: 1px solid
+		${props => (props.top ? '#FFFFFF' : props.theme.primary)};
+`
+
+const Container = styled.div`
 	display: flex;
 	justify-content: space-between;
-	margin: 1.5rem 0 1rem;
+	margin: 1.5rem auto 1rem !important;
 
 	@media screen and (max-width: 1087px) {
 		padding: 0 0.75rem;
@@ -75,20 +86,42 @@ const Message = styled.p`
 `
 
 class Title extends Component {
+	constructor(props) {
+		super()
+
+		this.state = {
+			top: true
+		}
+
+		this.handleScroll = this.handleScroll.bind(this)
+	}
+
+	componentDidMount() {
+		window.addEventListener('scroll', this.handleScroll)
+	}
+
+	handleScroll(event) {
+		const top = window.scrollY > 0 ? false : true
+		this.setState({ top })
+	}
+
 	render() {
 		const { theme, donate, message } = this.props
+		const { top } = this.state
 
 		return (
-			<Wrapper>
-				<Name theme={theme}>
-					<span className="omise">Omise</span> Tamboon React
-				</Name>
-				<Donations>
-					<Amount theme={theme}>
-						All donations: <div className="amount">{toCurrency(donate)}</div>
-					</Amount>
-					<Message theme={theme}>{message}</Message>
-				</Donations>
+			<Wrapper theme={theme} top={top}>
+				<Container className="container">
+					<Name theme={theme}>
+						<span className="omise">Omise</span> Tamboon React
+					</Name>
+					<Donations>
+						<Amount theme={theme}>
+							All donations: <div className="amount">{toCurrency(donate)}</div>
+						</Amount>
+						<Message theme={theme}>{message}</Message>
+					</Donations>
+				</Container>
 			</Wrapper>
 		)
 	}

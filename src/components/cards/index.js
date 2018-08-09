@@ -9,6 +9,10 @@ import { summaryDonations } from '../../helpers'
 
 import Card from './card'
 
+const Container = styled.div`
+	margin: 120px auto 0 !important;
+`
+
 const Columns = styled.div`
 	@media screen and (max-width: 1087px) {
 		margin: 0 !important;
@@ -48,9 +52,11 @@ class Cards extends Component {
 		const { charities } = this.state
 
 		return (
-			<Columns className="columns">
-				{charities.map((item, index) => <Card key={index} item={item} />)}
-			</Columns>
+			<Container className="container">
+				<Columns className="columns">
+					{charities.map((item, index) => <Card key={index} item={item} />)}
+				</Columns>
+			</Container>
 		)
 	}
 }

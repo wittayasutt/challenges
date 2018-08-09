@@ -11,20 +11,19 @@ library.add(faTimes)
 import Title from './components/title'
 import Cards from './components/cards'
 
-const Container = styled.div``
+const Wrapper = styled.div``
 
 class App extends Component {
 	render() {
 		return (
 			<ThemeProvider theme={theme}>
-				<Container className="container">
+				<Wrapper>
 					<Title />
 					<Cards />
-				</Container>
+				</Wrapper>
 			</ThemeProvider>
 		)
 	}
 }
 
 export default App
-
